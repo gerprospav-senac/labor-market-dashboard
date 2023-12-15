@@ -27,26 +27,17 @@ function buildVacancyList() {
     }));
   }
 
-  $('#datatable-vacancy-list').DataTable({
-    data: dataset,
-    columns: [
-      { title: 'Título', data: 'TITLE', render: titleColumnRender },
-      { title: 'Empresa', data: 'COMPANY', render: companyColumnRender },
-      { title: 'Salário', data: 'SALARY (MIN)', render: salaryColumnRender },
-      { title: 'Vínculo', data: 'RELATIONSHIP', render: relationshipColumnRender },
-      { title: 'Modalidade', data: 'MODALITY (NORMALIZED)', render: modalityColumnRender },
-      { title: 'Estado', data: 'LOCATION (STATE)', render: stateColumnRender },
-      { title: 'PCD', data: 'PWD', render: pwdColumnRender },
-      { title: 'Publicação', data: 'PUBLICATION DATE (NORMALIZED)', render: publicationColumnRender },
-    ],
-    columnDefs: [],
-    order: [],
-    responsive: true,
-    paging: true,
-    dom: '<"container-fluid"<"row"<"col"B><"col"f>>>rt<"container-fluid"<"row"<"col"i><"col"p>>>',
-    buttons: ["copy", "csv", "excel", "pdf", "print", "colvis"],
-    language: getDataTablesI18nPTBRConfig()
-  });
+  const columns = [
+    { title: 'Título', data: 'TITLE', render: titleColumnRender },
+    { title: 'Empresa', data: 'COMPANY', render: companyColumnRender },
+    { title: 'Salário', data: 'SALARY (MIN)', render: salaryColumnRender },
+    { title: 'Vínculo', data: 'RELATIONSHIP', render: relationshipColumnRender },
+    { title: 'Modalidade', data: 'MODALITY (NORMALIZED)', render: modalityColumnRender },
+    { title: 'Estado', data: 'LOCATION (STATE)', render: stateColumnRender },
+    { title: 'PCD', data: 'PWD', render: pwdColumnRender },
+    { title: 'Publicação', data: 'PUBLICATION DATE (NORMALIZED)', render: publicationColumnRender },
+  ];
+  buildDataTables('#datatable-vacancy-list', dataset, columns);
 }
 
 function titleColumnRender(data, type, row) {
