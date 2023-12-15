@@ -53,3 +53,76 @@ function buildDataTablesI18n() {
     }
   };
 }
+
+function titleColumnRender(data, type, row) {
+  if (type == 'display') {
+    return data?.toUpperCase();
+  }
+  return data;
+}
+
+function companyColumnRender(data, type, row) {
+  if (type == 'display') {
+    return data?.toUpperCase();
+  }
+  return data;
+}
+
+function salaryColumnRender(data, type, row) {
+  if (type == 'display') {
+    const formatter = new Intl.NumberFormat('pt-BR', { style: 'decimal' });
+    return typeof data === 'number' ? `R$ ${formatter.format(data)}` : '-';
+  }
+  return data;
+}
+
+function relationshipColumnRender(data, type, row) {
+  if (type == 'display') {
+    return data?.toUpperCase();
+  }
+  return data;
+}
+
+function modalityColumnRender(data, type, row) {
+  if (type == 'display') {
+    return data?.toUpperCase();
+  }
+  return data;
+}
+
+function stateColumnRender(data, type, row) {
+  if (type == 'display') {
+    return data?.toUpperCase();
+  }
+  return data;
+}
+
+function pwdColumnRender(data, type, row) {
+  if (type == 'display') {
+    return data ? 'SIM' : 'NÃO';
+  }
+  return data;
+}
+
+function publicationColumnRender(data, type, row) {
+  if (type == 'display') {
+    const DateTime = luxon.DateTime;
+    return DateTime.fromISO(data).toLocaleString(DateTime.DATE_SHORT);
+  }
+  return data;
+}
+
+function upperCaseColumnRender(data, type, row) {
+  if (type == 'display') {
+    return data?.toUpperCase();
+  }
+  return data;
+}
+
+function numberColumnRender(data, type, row) {
+  if (type == 'display') {
+    const formatter = new Intl.NumberFormat('pt-BR', { style: 'decimal' });
+    return formatter.format(data);
+  }
+  return data;
+}

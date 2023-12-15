@@ -11,10 +11,12 @@ function buildGeographicDistribution() {
   buildMapChart('chart-geographic-distribution', dataset);
 
   const columns = [
-    { title: 'UF' },
-    { title: 'Número de vagas' },
+    { title: 'Estado', data: 'label', render: upperCaseColumnRender },
+    { title: 'Número de vagas', data: 'value', render: numberColumnRender },
   ];
-  buildDataTables('#datatable-geographic-distribution', dataset, columns);
+  const columnDefs = [{ width: '50%', targets: 1 }];
+  const order = [[ 1, 'desc' ]];
+  buildDataTables('#datatable-geographic-distribution', dataset, columns, columnDefs, order);
 }
 
 function buildHighlightEmployers() {
@@ -49,10 +51,12 @@ function buildHighlightTitlesApprentice() {
   
   const dataset = buildHighlightTitlesApprenticeDataset();
   const columns = [
-    { title: 'Título' },
-    { title: 'Número de vagas' },
+    { title: 'Título', data: 'label', render: upperCaseColumnRender },
+    { title: 'Número de vagas', data: 'value', render: numberColumnRender },
   ];
-  buildDataTables('#datatable-highlight-titles-apprentice', dataset, columns);
+  const columnDefs = [{ width: '50%', targets: 1 }];
+  const order = [[ 1, 'desc' ]];
+  buildDataTables('#datatable-highlight-titles-apprentice', dataset, columns, columnDefs, order);
 }
 function buildHighlightTitlesTechnician() {
   const datasetOrderedStates = buildHighlightTitlesTechnicianStateDataset();
@@ -60,10 +64,12 @@ function buildHighlightTitlesTechnician() {
   
   const dataset = buildHighlightTitlesTechnicianDataset();
   const columns = [
-    { title: 'Título' },
-    { title: 'Número de vagas' },
+    { title: 'Título', data: 'label', render: upperCaseColumnRender },
+    { title: 'Número de vagas', data: 'value', render: numberColumnRender },
   ];
-  buildDataTables('#datatable-highlight-titles-technician', dataset, columns);
+  const columnDefs = [{ width: '50%', targets: 1 }];
+  const order = [[ 1, 'desc' ]];
+  buildDataTables('#datatable-highlight-titles-technician', dataset, columns, columnDefs, order);
 }
 function buildHighlightTitlesOthers() {
   const datasetOrderedStates = buildHighlightTitlesOthersStateDataset();
@@ -71,56 +77,167 @@ function buildHighlightTitlesOthers() {
 
   const dataset = buildHighlightTitlesOthersDataset();
   const columns = [
-    { title: 'Título' },
-    { title: 'Número de vagas' },
+    { title: 'Título', data: 'label', render: upperCaseColumnRender },
+    { title: 'Número de vagas', data: 'value', render: numberColumnRender },
   ];
-  buildDataTables('#datatable-highlight-titles-others', dataset, columns);
+  const columnDefs = [{ width: '50%', targets: 1 }];
+  const order = [[ 1, 'desc' ]];
+  buildDataTables('#datatable-highlight-titles-others', dataset, columns, columnDefs, order);
 }
 
-function buildGeographicDistribuitionDataset() { return []; }
-function buildHighlightEmployersDataset() { return []; }
-function buildSalaryDistributionDataset() { return []; }
-function buildVacancyProfileRelationshipDataset() { return []; }
-function buildVacancyProfileModalityDataset() { return []; }
-function buildVacancyProfilePWDDataset() { return []; }
-function buildHighlightTitlesApprenticeStateDataset() { return []; }
-function buildHighlightTitlesApprenticeDataset() { return []; }
-function buildHighlightTitlesTechnicianStateDataset() { return []; }
-function buildHighlightTitlesTechnicianDataset() { return []; }
-function buildHighlightTitlesOthersStateDataset() { return []; }
-function buildHighlightTitlesOthersDataset() { return []; }
+function buildGeographicDistribuitionDataset() {
+  const evaluatorFn = (item, other) => item.name === other['LOCATION (STATE)'];
+  const counterFn = item => laborMarketDataset.filter(other => evaluatorFn(item, other)).length;
+  const formatterFn = item => ({ id: `BR-${item.abbreviation}`, label: item.name, value: counterFn(item) });
+  return brazilianGeographyDataset.map(formatterFn);
+}
 
-function buildHighlightTitlesBoxes(id, dataset) {}
+function buildHighlightEmployersDataset() {
+  const filtered = laborMarketDataset.map(item => ({
+    ...item,
+    'COMPANY': ['', '********'].includes(item['COMPANY']) ? 'Confidencial' : item['COMPANY']
+  })).filter(item => item['COMPANY'] !== 'Confidencial');
+
+  // TO DO: unique
+  // TO DO: counter
+  // TO DO: sort & TOP 30
+
+  return [
+    {
+      "year": "2005",
+      "income": 23.5,
+      "expenses": 18.1
+    }, {
+      "year": "2006",
+      "income": 26.2,
+      "expenses": 22.8
+    }
+  ];
+}
+
+function buildSalaryDistributionDataset() {
+  return [];
+}
+
+function buildVacancyProfileRelationshipDataset() {
+  return [
+    { label: 'Efetivo', value: 3000 },
+    { label: 'Temporário', value: 692 },
+  ];
+}
+
+function buildVacancyProfileModalityDataset() {
+  const homeoffice = laborMarketDataset.filter(item => item['MODALITY (NORMALIZED)'] === 'home office');
+  return [
+    { label: 'Presencial', value: laborMarketDataset.length - homeoffice.length },
+    { label: 'Home Office', value: homeoffice.length },
+  ];
+}
+
+function buildVacancyProfilePWDDataset() {
+  const pwd = laborMarketDataset.filter(item => item['PWD'] === true);
+  return [
+    { label: 'Padrão', value: laborMarketDataset.length - pwd.length },
+    { label: 'PCD', value: pwd.length },
+  ];
+}
+
+function buildHighlightTitlesApprenticeStateDataset() {
+  const evaluatorFn = value => typeof value === 'string' && value.toLowerCase().includes('aprendiz');
+  const filtered = laborMarketDataset.filter(item => evaluatorFn(item['TITLE']));
+  return [
+    { label: 'São Paulo', value: 10 },
+    { label: 'Rio de Janeiro', value: 8 },
+    { label: 'Acre', value: 4 }
+  ];
+}
+
+function buildHighlightTitlesApprenticeDataset() {
+  const evaluatorFn = value => typeof value === 'string' && value.toLowerCase().includes('aprendiz');
+  const filtered = laborMarketDataset.filter(item => evaluatorFn(item['TITLE']));
+  return [];
+}
+
+function buildHighlightTitlesTechnicianStateDataset() {
+  const evaluatorFn = value => typeof value === 'string' && value.toLowerCase().startsWith('técnico');
+  const filtered = laborMarketDataset.filter(item => evaluatorFn(item['TITLE']));
+  return [
+    { label: 'São Paulo', value: 10 },
+    { label: 'Rio de Janeiro', value: 8 },
+    { label: 'Acre', value: 4 }
+  ];
+}
+
+function buildHighlightTitlesTechnicianDataset() {
+  const evaluatorFn = value => typeof value === 'string' && value.toLowerCase().startsWith('técnico');
+  const filtered = laborMarketDataset.filter(item => evaluatorFn(item['TITLE']));
+  return [];
+}
+
+function buildHighlightTitlesOthersStateDataset() {
+  // TO DO: filtro não contém aprendiz e não começa por técnico
+  // TO DO: contar quantidade de vagas por estado
+  return [
+    { label: 'São Paulo', value: 10 },
+    { label: 'Rio de Janeiro', value: 8 },
+    { label: 'Acre', value: 4 }
+  ];
+}
+
+function buildHighlightTitlesOthersDataset() {
+  // TO DO: filtro não contém aprendiz e não começa por técnico
+  return [];
+}
+
+function buildHighlightTitlesBoxes(id, dataset) {
+  const [first, second, third] = dataset;
+
+  buildHighlightTitlesBox(id, 'first', first);
+  buildHighlightTitlesBox(id, 'second', second);
+  buildHighlightTitlesBox(id, 'third', third);
+}
+
+function buildHighlightTitlesBox(id, position, data) {
+  const formatter = new Intl.NumberFormat('pt-BR', { style: 'decimal' });
+
+  const textSelector = `div#${id}-${position} > div.info-box-content > span.info-box-text`;
+  const text = document.querySelector(textSelector);
+  if (text) {
+    text.innerHTML = data?.label || 'N/A';
+  }
+
+  const numberSelector = `div#${id}-${position} > div.info-box-content > span.info-box-number`;
+  const number = document.querySelector(numberSelector);
+  if (number) {
+    number.innerHTML = `${formatter.format(data?.value || 0)} vagas`;
+  }
+}
 
 function buildMapChart(id, dataset) {
-  am5.ready(function() {
+  am5.ready(() => {
     const root = am5.Root.new(id);
-    
     const exportingMenuOptions = { align: 'left', valign: 'top' };
     const exportingMenu = am5plugins_exporting.ExportingMenu.new(root, exportingMenuOptions);
     am5plugins_exporting.Exporting.new(root, { menu: exportingMenu });
 
     root.setThemes([am5themes_Animated.new(root)]);
     
-    var chart = root.container.children.push(am5map.MapChart.new(root, {
-      panX: "rotateX",
-      projection: am5map.geoMercator(),
-      layout: root.horizontalLayout
-    }));
+    const chart = root.container.children.push(
+      am5map.MapChart.new(
+        root,
+        { panX: 'rotateX', projection: am5map.geoMercator(), layout: root.horizontalLayout }
+      )
+    );
 
-    var polygonSeries = chart.series.push(am5map.MapPolygonSeries.new(root, {
-      calculateAggregates: true,
-      valueField: "value"
-    }));
+    const polygonSeries = chart.series.push(
+      am5map.MapPolygonSeries.new(
+        root,
+        { calculateAggregates: true, valueField: 'value' }
+      )
+    );
     
-    polygonSeries.mapPolygons.template.setAll({
-      tooltipText: "{name}",
-      interactive: true
-    });
-    
-    polygonSeries.mapPolygons.template.states.create("hover", {
-      fill: am5.color(0x677935)
-    });
+    polygonSeries.mapPolygons.template.setAll({ tooltipText: '{name}', interactive: true });
+    polygonSeries.mapPolygons.template.states.create('hover', { fill: am5.color(0x677935) });
     
     polygonSeries.set("heatRules", [{
       target: polygonSeries.mapPolygons.template,
@@ -134,109 +251,65 @@ function buildMapChart(id, dataset) {
       heatLegend.showValue(ev.target.dataItem.get("value"));
     });
     
-    var heatLegend = chart.children.push(
-      am5.HeatLegend.new(root, {
-        orientation: "vertical",
-        startColor: am5.color(0x8ab7ff),
-        endColor: am5.color(0x25529a),
-        startText: "Menos vagas",
-        endText: "Mais vagas",
-        stepCount: 5
-      })
+    const heatLegend = chart.children.push(
+      am5.HeatLegend.new(
+        root,
+        {
+          orientation: 'vertical',
+          startColor: am5.color(0x8ab7ff),
+          endColor: am5.color(0x25529a),
+          startText: 'Menos vagas',
+          endText: 'Mais vagas',
+          stepCount: 5
+        }
+      )
     );
     
-    heatLegend.startLabel.setAll({
-      fontSize: 12,
-      fill: heatLegend.get("startColor")
-    });
-    
-    heatLegend.endLabel.setAll({
-      fontSize: 12,
-      fill: heatLegend.get("endColor")
-    });
-    
-    polygonSeries.events.on("datavalidated", function () {
-      heatLegend.set("startValue", polygonSeries.getPrivate("valueLow"));
-      heatLegend.set("endValue", polygonSeries.getPrivate("valueHigh"));
+    heatLegend.startLabel.setAll({ fontSize: 12, fill: heatLegend.get('startColor') });
+    heatLegend.endLabel.setAll({ fontSize: 12, fill: heatLegend.get('endColor') });
+
+    polygonSeries.events.on('datavalidated', function () {
+      heatLegend.set('startValue', polygonSeries.getPrivate('valueLow'));
+      heatLegend.set('endValue', polygonSeries.getPrivate('valueHigh'));
     });
 
-    loadGeodata('BR');
-    function loadGeodata(country) {
-      chart.set("projection", am5map.geoMercator());
-      
-      var currentMap = "usaLow";
-      if (am5geodata_data_countries2[country] !== undefined) {
-        currentMap = am5geodata_data_countries2[country]["maps"][0];
-      }
-      
-      // console.log(currentMap);
-      am5.net.load("https://cdn.amcharts.com/lib/5/geodata/json/" + currentMap + ".json", chart).then(function (result) {
-        var geodata = am5.JSONParser.parse(result.response);
-        
-        var data = [];
-        for(var i = 0; i < geodata.features.length; i++) {
-          data.push({
-            id: geodata.features[i].id,
-            value: Math.round( Math.random() * 10000 )
-          });
-        }
-        // console.log(data);
-
-        polygonSeries.set("geoJSON", geodata);
-        polygonSeries.data.setAll(data);
-      });
-    }
+    polygonSeries.set('geoJSON', am5geodata_brazilHigh);
+    polygonSeries.data.setAll(dataset);
   });
 }
 
 function buildBarChart(id, dataset) {
-  am5.ready(function() {
+  am5.ready(() => {
     const root = am5.Root.new(id);
-
     const exportingMenuOptions = { align: 'right', valign: 'bottom' };
     const exportingMenu = am5plugins_exporting.ExportingMenu.new(root, exportingMenuOptions);
     am5plugins_exporting.Exporting.new(root, { menu: exportingMenu });
 
     root.setThemes([am5themes_Animated.new(root)]);
     
-    var chart = root.container.children.push(am5xy.XYChart.new(root, {
-      panX: false,
-      panY: false,
-      wheelX: "panX",
-      wheelY: "zoomX",
-      paddingLeft: 0,
-      layout: root.verticalLayout
-    }));
-    
-    var data = [{
-      "year": "2005",
-      "income": 23.5,
-      "expenses": 18.1
-    }, {
-      "year": "2006",
-      "income": 26.2,
-      "expenses": 22.8
-    }, {
-      "year": "2007",
-      "income": 30.1,
-      "expenses": 23.9
-    }, {
-      "year": "2008",
-      "income": 29.5,
-      "expenses": 25.1
-    }, {
-      "year": "2009",
-      "income": 24.6,
-      "expenses": 25
-    }];
+    var chart = root.container.children.push(
+      am5xy.XYChart.new(
+        root,
+        {
+          panX: false,
+          panY: false,
+          wheelX: 'panX',
+          wheelY: 'zoomX',
+          paddingLeft: 0,
+          layout: root.verticalLayout
+        }
+      )
+    );
 
-    var yRenderer = am5xy.AxisRendererY.new(root, {
-      cellStartLocation: 0.1,
-      cellEndLocation: 0.9,
-      minorGridEnabled: true
-    });
-    
-    yRenderer.grid.template.set("location", 1);
+    var yRenderer = am5xy.AxisRendererY.new(
+      root,
+      {
+        cellStartLocation: 0.1,
+        cellEndLocation: 0.9,
+        minorGridEnabled: true
+      }
+    );
+    yRenderer.grid.template.set('location', 1);
     
     var yAxis = chart.yAxes.push(
       am5xy.CategoryAxis.new(root, {
@@ -245,8 +318,7 @@ function buildBarChart(id, dataset) {
         tooltip: am5.Tooltip.new(root, {})
       })
     );
-    
-    yAxis.data.setAll(data);
+    yAxis.data.setAll(dataset);
     
     var xAxis = chart.xAxes.push(
       am5xy.ValueAxis.new(root, {
@@ -271,25 +343,21 @@ function buildBarChart(id, dataset) {
       })
     }));
     
-    series1.columns.template.setAll({
-      height: am5.percent(70)
-    });
+    series1.columns.template.setAll({ height: am5.percent(70) });
 
-    var cursor = chart.set("cursor", am5xy.XYCursor.new(root, {
-      behavior: "zoomY"
-    }));
-    cursor.lineX.set("visible", false);
+    const cursor = chart.set('cursor', am5xy.XYCursor.new(root, { behavior: 'zoomY' }));
+    cursor.lineX.set('visible', false);
+    cursor.lineY.set('visible', false);
     
-    series1.data.setAll(data);
+    series1.data.setAll(dataset);
     series1.appear();
     chart.appear(1000, 100);
   });
 }
 
 function buildColumnChart(id, dataset) {
-  am5.ready(function() {
+  am5.ready(() => {
     const root = am5.Root.new(id);
-
     const exportingMenuOptions = { align: 'right', valign: 'bottom' };
     const exportingMenu = am5plugins_exporting.ExportingMenu.new(root, exportingMenuOptions);
     am5plugins_exporting.Exporting.new(root, { menu: exportingMenu });
@@ -383,9 +451,8 @@ function buildColumnChart(id, dataset) {
 }
 
 function buildPieChart(id, dataset) {
-  am5.ready(function() {
+  am5.ready(() => {
     const root = am5.Root.new(id);
-    
     const exportingMenuOptions = { align: 'right', valign: 'bottom' };
     const exportingMenu = am5plugins_exporting.ExportingMenu.new(root, exportingMenuOptions);
     am5plugins_exporting.Exporting.new(root, { menu: exportingMenu });
@@ -394,15 +461,18 @@ function buildPieChart(id, dataset) {
     
     var chart = root.container.children.push(am5percent.PieChart.new(root, { endAngle: 270 }));
     var series = chart.series.push(
-      am5percent.PieSeries.new(root, {
-        valueField: "value",
-        categoryField: "category",
-        endAngle: 270
-      })
+      am5percent.PieSeries.new(
+        root,
+        {
+          valueField: 'value',
+          categoryField: 'label',
+          endAngle: 270
+        }
+      )
     );
 
-    series.states.create("hidden", { endAngle: -90 });
-    series.data.setAll([{ category: 'Austria', value: 128.3 }, { category: 'UK', value: 99 }]);
+    series.states.create('hidden', { endAngle: -90 });
+    series.data.setAll(dataset);
     series.appear(1000, 100);
   });
 }
