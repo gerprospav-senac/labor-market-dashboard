@@ -109,7 +109,6 @@ function buildHighlightEmployersDataset() {
 function buildSalaryDistributionDataset() {
   const available = laborMarketDataset.filter(item => item['SALARY (AVAILABLE)'] === true);
   const salaries = available.map(item => item['SALARY (MIN)']);
-  console.log(salaries);
   const filtered = salaries.filter(item => item > 300 && item < 30000);
 
   const counterFn = (min, max) => filtered.filter(item => item >= min && item <= max).length;
@@ -127,10 +126,12 @@ function buildSalaryDistributionDataset() {
 }
 
 function buildVacancyProfileRelationshipDataset() {
-  return [
-    { label: 'Efetivo', value: 3000 },
-    { label: 'Temporário', value: 692 },
-  ];
+  const relationships = laborMarketDataset.map(item => item['RELATIONSHIP']).sort();
+  const unique = [...new Set(relationships)];
+
+  const counterFn = item => relationships.filter(other => other === item).length;
+  const formatterFn = item => ({ label: item, value: counterFn(item) });
+  return unique.map(formatterFn);
 }
 
 function buildVacancyProfileModalityDataset() {
@@ -470,22 +471,69 @@ function buildPieChart(id, dataset) {
     const exportingMenu = am5plugins_exporting.ExportingMenu.new(root, exportingMenuOptions);
     am5plugins_exporting.Exporting.new(root, { menu: exportingMenu });
 
-    root.setThemes([am5themes_Animated.new(root)]);
-    
-    var chart = root.container.children.push(am5percent.PieChart.new(root, { endAngle: 270 }));
-    var series = chart.series.push(
-      am5percent.PieSeries.new(
-        root,
-        {
-          valueField: 'value',
-          categoryField: 'label',
-          endAngle: 270
-        }
-      )
-    );
 
-    series.states.create('hidden', { endAngle: -90 });
+    // Set themes
+    // https://www.amcharts.com/docs/v5/concepts/themes/
+    root.setThemes([
+      am5themes_Animated.new(root),
+      am5themes_Responsive.new(root)
+    ]);
+
+
+    // Create chart
+    // https://www.amcharts.com/docs/v5/charts/percent-charts/pie-chart/
+    var chart = root.container.children.push(am5percent.PieChart.new(root, {
+      layout: root.horizontalLayout
+    }));
+
+
+    // Create series
+    // https://www.amcharts.com/docs/v5/charts/percent-charts/pie-chart/#Series
+    var series = chart.series.push(am5percent.PieSeries.new(root, {
+      valueField: "value",
+      categoryField: "label",
+      legendLabelText: "[{fill}]{category}[/]",
+    legendValueText: "[bold {fill}]{value}[/]"
+    }));
+    series.labels.template.set("forceHidden", true);
+series.ticks.template.set("forceHidden", true);
+
+
+    // Set data
+    // https://www.amcharts.com/docs/v5/charts/percent-charts/pie-chart/#Setting_data
     series.data.setAll(dataset);
+
+
+    // Create legend
+    // https://www.amcharts.com/docs/v5/charts/percent-charts/legend-percent-series/
+    var legend = chart.children.push(am5.Legend.new(root, {
+      centerY: am5.percent(50),
+    y: am5.percent(50),
+    layout: root.verticalLayout
+    }));
+
+    chart.onPrivate("width", function(width) {
+      var availableSpace = Math.max(width - chart.height() - 100, 100);
+      legend.labels.template.setAll({
+        width: availableSpace,
+        maxWidth: availableSpace
+      });
+    })
+
+    legend.labels.template.setAll({
+      oversizedBehavior: "truncate"
+    });
+    
+    legend.valueLabels.template.setAll({
+      width: 50,
+      textAlign: "right"
+    });
+
+    legend.data.setAll(series.dataItems);
+
+
+    // Play initial series animation
+    // https://www.amcharts.com/docs/v5/concepts/animations/#Animation_of_series
     series.appear(1000, 100);
   });
 }
