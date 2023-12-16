@@ -425,35 +425,37 @@ function buildColumnChart(id, dataset) {
     });
     xRenderer.grid.template.setAll({ location: 1 });
     
-    var xAxis = chart.xAxes.push(am5xy.CategoryAxis.new(root, {
-      maxDeviation: 0.3,
-      categoryField: 'label',
-      renderer: xRenderer,
-      tooltip: am5.Tooltip.new(root, {})
-    }));
+    const xAxis = chart.xAxes.push(
+      am5xy.CategoryAxis.new(
+        root,
+        {
+          maxDeviation: 0.3,
+          categoryField: 'label',
+          renderer: xRenderer,
+          tooltip: am5.Tooltip.new(root, {})
+        }
+      )
+    );
     
     const yRenderer = am5xy.AxisRendererY.new(root, { strokeOpacity: 0.1 });
     const yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, { maxDeviation: 0.3, renderer: yRenderer }));
     
     const series = chart.series.push(am5xy.ColumnSeries.new(root, {
-      name: "Series 1",
       xAxis: xAxis,
       yAxis: yAxis,
-      valueYField: "value",
+      valueYField: 'value',
       sequencedInterpolation: true,
-      categoryXField: "label",
-      tooltip: am5.Tooltip.new(root, {
-        labelText: "{valueY}"
-      })
+      categoryXField: 'label',
+      tooltip: am5.Tooltip.new(root, { labelText: '{valueY}' })
     }));
     
     series.columns.template.setAll({ cornerRadiusTL: 5, cornerRadiusTR: 5, strokeOpacity: 0 });
-    series.columns.template.adapters.add("fill", function (fill, target) {
-      return chart.get("colors").getIndex(series.columns.indexOf(target));
+    series.columns.template.adapters.add('fill', function (fill, target) {
+      return chart.get('colors').getIndex(series.columns.indexOf(target));
     });
     
-    series.columns.template.adapters.add("stroke", function (stroke, target) {
-      return chart.get("colors").getIndex(series.columns.indexOf(target));
+    series.columns.template.adapters.add('stroke', function (stroke, target) {
+      return chart.get('colors').getIndex(series.columns.indexOf(target));
     });
     
     xAxis.data.setAll(dataset);
@@ -471,69 +473,45 @@ function buildPieChart(id, dataset) {
     const exportingMenu = am5plugins_exporting.ExportingMenu.new(root, exportingMenuOptions);
     am5plugins_exporting.Exporting.new(root, { menu: exportingMenu });
 
-
-    // Set themes
-    // https://www.amcharts.com/docs/v5/concepts/themes/
     root.setThemes([
       am5themes_Animated.new(root),
       am5themes_Responsive.new(root)
     ]);
-
-
-    // Create chart
-    // https://www.amcharts.com/docs/v5/charts/percent-charts/pie-chart/
-    var chart = root.container.children.push(am5percent.PieChart.new(root, {
-      layout: root.horizontalLayout
-    }));
-
-
-    // Create series
-    // https://www.amcharts.com/docs/v5/charts/percent-charts/pie-chart/#Series
-    var series = chart.series.push(am5percent.PieSeries.new(root, {
-      valueField: "value",
-      categoryField: "label",
-      legendLabelText: "[{fill}]{category}[/]",
-    legendValueText: "[bold {fill}]{value}[/]"
-    }));
-    series.labels.template.set("forceHidden", true);
-series.ticks.template.set("forceHidden", true);
-
-
-    // Set data
-    // https://www.amcharts.com/docs/v5/charts/percent-charts/pie-chart/#Setting_data
-    series.data.setAll(dataset);
-
-
-    // Create legend
-    // https://www.amcharts.com/docs/v5/charts/percent-charts/legend-percent-series/
-    var legend = chart.children.push(am5.Legend.new(root, {
-      centerY: am5.percent(50),
-    y: am5.percent(50),
-    layout: root.verticalLayout
-    }));
-
-    chart.onPrivate("width", function(width) {
-      var availableSpace = Math.max(width - chart.height() - 100, 100);
-      legend.labels.template.setAll({
-        width: availableSpace,
-        maxWidth: availableSpace
-      });
-    })
-
-    legend.labels.template.setAll({
-      oversizedBehavior: "truncate"
-    });
     
-    legend.valueLabels.template.setAll({
-      width: 50,
-      textAlign: "right"
-    });
-
+    const chart = root.container.children.push(
+      am5percent.PieChart.new(root, { layout: root.horizontalLayout })
+    );
+    
+    const series = chart.series.push(am5percent.PieSeries.new(root, {
+      valueField: 'value',
+      categoryField: 'label',
+      legendValueText: '{value}'
+    }));
+    series.labels.template.set('forceHidden', true);
+    series.ticks.template.set('forceHidden', true);
+    series.data.setAll(dataset);
+    
+    const legend = chart.children.push(am5.Legend.new(root, {
+      centerY: am5.percent(50),
+      y: am5.percent(50),
+      layout: root.verticalLayout
+    }));
+    legend.labels.template.setAll({ oversizedBehavior: 'truncate' });
+    legend.valueLabels.template.setAll({ width: 50, textAlign: 'right' });
     legend.data.setAll(series.dataItems);
 
+    chart.onPrivate(
+      'width',
+      (width) => {
+        const availableSpace = Math.max(width - chart.height() - 80, 80);
+        legend.labels.template.setAll({
+          fontSize: 14,
+          width: availableSpace,
+          maxWidth: availableSpace
+        });
+      }
+    )
 
-    // Play initial series animation
-    // https://www.amcharts.com/docs/v5/concepts/animations/#Animation_of_series
     series.appear(1000, 100);
   });
 }

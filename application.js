@@ -1,7 +1,3 @@
-document.addEventListener("DOMContentLoaded", function(event) {
-  // TO DO
-});
-
 function buildDataTables(selector, dataset, columns = [], columnDefs = [], order = []) {
   return $(selector).DataTable({
     data: dataset,
