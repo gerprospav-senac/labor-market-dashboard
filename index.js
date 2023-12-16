@@ -96,27 +96,34 @@ function buildHighlightEmployersDataset() {
   const filtered = laborMarketDataset.map(item => ({
     ...item,
     'COMPANY': ['', '********'].includes(item['COMPANY']) ? 'Confidencial' : item['COMPANY']
-  })).filter(item => item['COMPANY'] !== 'Confidencial');
+  })).filter(item => item['COMPANY'].toLowerCase() !== 'confidencial');
 
-  // TO DO: unique
-  // TO DO: counter
-  // TO DO: sort & TOP 30
+  const companies = filtered.map(item => item['COMPANY']).sort();
+  const unique = [...new Set(companies)];
 
-  return [
-    {
-      "year": "2005",
-      "income": 23.5,
-      "expenses": 18.1
-    }, {
-      "year": "2006",
-      "income": 26.2,
-      "expenses": 22.8
-    }
-  ];
+  const counterFn = item => companies.filter(other => other === item).length;
+  const formatterFn = item => ({ label: item, value: counterFn(item) });
+  return unique.map(formatterFn).sort((item, other) => other.value - item.value).slice(0, 10);
 }
 
 function buildSalaryDistributionDataset() {
-  return [];
+  const available = laborMarketDataset.filter(item => item['SALARY (AVAILABLE)'] === true);
+  const salaries = available.map(item => item['SALARY (MIN)']);
+  console.log(salaries);
+  const filtered = salaries.filter(item => item > 300 && item < 30000);
+
+  const counterFn = (min, max) => filtered.filter(item => item >= min && item <= max).length;
+  return [
+    { label: 'Até 1.000', value: counterFn(0, 1000) },
+    { label: '1.001 a 1.500', value: counterFn(1001, 1500) },
+    { label: '1.501 a 2.000', value: counterFn(1501, 2000) },
+    { label: '2.001 a 3.000', value: counterFn(2001, 3000) },
+    { label: '3.001 a 4.000', value: counterFn(3001, 4000) },
+    { label: '4.001 a 5.000', value: counterFn(4001, 5000) },
+    { label: '5.001 a 7.000', value: counterFn(5001, 7000) },
+    { label: '7.001 a 10.000', value: counterFn(7001, 10000) },
+    { label: 'Acima de 10.001', value: counterFn(10001, 30000) }
+  ];
 }
 
 function buildVacancyProfileRelationshipDataset() {
@@ -313,7 +320,7 @@ function buildBarChart(id, dataset) {
     
     var yAxis = chart.yAxes.push(
       am5xy.CategoryAxis.new(root, {
-        categoryField: "year",
+        categoryField: 'label',
         renderer: yRenderer,
         tooltip: am5.Tooltip.new(root, {})
       })
@@ -331,15 +338,15 @@ function buildBarChart(id, dataset) {
     );
     
     var series1 = chart.series.push(am5xy.ColumnSeries.new(root, {
-      name: "Income",
+      name: 'value',
       xAxis: xAxis,
       yAxis: yAxis,
-      valueXField: "income",
-      categoryYField: "year",
+      valueXField: 'value',
+      categoryYField: 'label',
       sequencedInterpolation: true,
       tooltip: am5.Tooltip.new(root, {
-        pointerOrientation: "horizontal",
-        labelText: "[bold]{name}[/]\n{categoryY}: {valueX}"
+        pointerOrientation: 'horizontal',
+        labelText: '{categoryY}: {valueX}'
       })
     }));
     
@@ -362,88 +369,69 @@ function buildColumnChart(id, dataset) {
     const exportingMenu = am5plugins_exporting.ExportingMenu.new(root, exportingMenuOptions);
     am5plugins_exporting.Exporting.new(root, { menu: exportingMenu });
 
-    const myTheme = am5.Theme.new(root);
-    myTheme.rule("AxisLabel", ["minor"]).setAll({
-      dy:1
+    root.setThemes([am5themes_Animated.new(root)]);
+    
+    const chart = root.container.children.push(
+      am5xy.XYChart.new(
+        root,
+        {
+          panX: true,
+          panY: true,
+          wheelX: 'panX',
+          wheelY: 'zoomX',
+          pinchZoomX: true,
+          paddingLeft: 0,
+          paddingRight: 1
+        }
+      )
+    );
+    
+    const cursor = chart.set('cursor', am5xy.XYCursor.new(root, {}));
+    cursor.lineX.set('visible', false);
+    cursor.lineY.set('visible', false);
+    
+    const xRenderer = am5xy.AxisRendererX.new(root, { minGridDistance: 30, minorGridEnabled: true });
+    xRenderer.labels.template.setAll({
+      rotation: -90,
+      centerY: am5.p50,
+      centerX: am5.p100,
+      paddingRight: 15
     });
-    root.setThemes([
-      am5themes_Animated.new(root),
-      myTheme,
-      am5themes_Responsive.new(root)
-    ]);
+    xRenderer.grid.template.setAll({ location: 1 });
     
-    var chart = root.container.children.push(am5xy.XYChart.new(root, {
-      panX: false,
-      panY: false,
-      wheelX: "panX",
-      wheelY: "zoomX",
-      paddingLeft:0
-    }));
-    
-    var cursor = chart.set("cursor", am5xy.XYCursor.new(root, {
-      behavior: "zoomX"
-    }));
-    cursor.lineY.set("visible", false);
-    
-    var xAxis = chart.xAxes.push(am5xy.DateAxis.new(root, {
-      maxDeviation: 0,
-      baseInterval: {
-        timeUnit: "day",
-        count: 1
-      },
-      renderer: am5xy.AxisRendererX.new(root, {
-        minorGridEnabled:true,
-        minorLabelsEnabled:true
-      }),
+    var xAxis = chart.xAxes.push(am5xy.CategoryAxis.new(root, {
+      maxDeviation: 0.3,
+      categoryField: 'label',
+      renderer: xRenderer,
       tooltip: am5.Tooltip.new(root, {})
     }));
     
-    xAxis.set("minorDateFormats", {
-      "day":"dd",
-      "month":"MM"
-    });
+    const yRenderer = am5xy.AxisRendererY.new(root, { strokeOpacity: 0.1 });
+    const yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, { maxDeviation: 0.3, renderer: yRenderer }));
     
-    var yAxis = chart.yAxes.push(am5xy.ValueAxis.new(root, {
-      renderer: am5xy.AxisRendererY.new(root, {})
-    }));
-    
-    var series = chart.series.push(am5xy.ColumnSeries.new(root, {
-      name: "Series",
+    const series = chart.series.push(am5xy.ColumnSeries.new(root, {
+      name: "Series 1",
       xAxis: xAxis,
       yAxis: yAxis,
       valueYField: "value",
-      valueXField: "date",
+      sequencedInterpolation: true,
+      categoryXField: "label",
       tooltip: am5.Tooltip.new(root, {
         labelText: "{valueY}"
       })
     }));
     
-    series.columns.template.setAll({ strokeOpacity: 0 })
+    series.columns.template.setAll({ cornerRadiusTL: 5, cornerRadiusTR: 5, strokeOpacity: 0 });
+    series.columns.template.adapters.add("fill", function (fill, target) {
+      return chart.get("colors").getIndex(series.columns.indexOf(target));
+    });
     
-    chart.set("scrollbarX", am5.Scrollbar.new(root, {
-      orientation: "horizontal"
-    }));
+    series.columns.template.adapters.add("stroke", function (stroke, target) {
+      return chart.get("colors").getIndex(series.columns.indexOf(target));
+    });
     
-    var date = new Date();
-    date.setHours(0, 0, 0, 0);
-    var value = 100;
-    function generateData() {
-      value = Math.round((Math.random() * 10 - 5) + value);
-      am5.time.add(date, "day", 1);
-      return {
-        date: date.getTime(),
-        value: value
-      };
-    }
-    function generateDatas(count) {
-      var data = [];
-      for (var i = 0; i < count; ++i) {
-        data.push(generateData());
-      }
-      return data;
-    }
-    var data = generateDatas(30);
-    series.data.setAll(data);
+    xAxis.data.setAll(dataset);
+    series.data.setAll(dataset);
 
     series.appear(1000);
     chart.appear(1000, 100);
