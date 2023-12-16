@@ -1,4 +1,6 @@
-document.addEventListener("DOMContentLoaded", function(event) {});
+document.addEventListener("DOMContentLoaded", function(event) {
+  // TO DO
+});
 
 function buildDataTables(selector, dataset, columns = [], columnDefs = [], order = []) {
   return $(selector).DataTable({
@@ -54,75 +56,40 @@ function buildDataTablesI18n() {
   };
 }
 
-function titleColumnRender(data, type, row) {
-  if (type == 'display') {
-    return data?.toUpperCase();
-  }
-  return data;
+function configureColumnRenderer(data, type, row, renderer) {
+  return type === 'display' ? renderer(data, type, row) : data;
 }
 
-function companyColumnRender(data, type, row) {
-  if (type == 'display') {
-    return data?.toUpperCase();
-  }
-  return data;
+function upperCaseColumnRenderer(data, type, row) {
+  const renderer = (data, type, row) => data?.toUpperCase();
+  return configureColumnRenderer(data, type, row, renderer);
 }
 
-function salaryColumnRender(data, type, row) {
-  if (type == 'display') {
+function numberColumnRenderer(data, type, row) {
+  const renderer = (data, type, row) => {
+    const formatter = new Intl.NumberFormat('pt-BR', { style: 'decimal' });
+    return typeof data === 'number' ? formatter.format(data) : 0;
+  };
+  return configureColumnRenderer(data, type, row, renderer);
+}
+
+function monetaryColumnRenderer(data, type, row) {
+  const renderer = (data, type, row) => {
     const formatter = new Intl.NumberFormat('pt-BR', { style: 'decimal' });
     return typeof data === 'number' ? `R$ ${formatter.format(data)}` : '-';
-  }
-  return data;
+  };
+  return configureColumnRenderer(data, type, row, renderer);
 }
 
-function relationshipColumnRender(data, type, row) {
-  if (type == 'display') {
-    return data?.toUpperCase();
-  }
-  return data;
+function booleanColumnRenderer(data, type, row) {
+  const renderer = (data, type, row) => data ? 'SIM' : 'NÃO';
+  return configureColumnRenderer(data, type, row, renderer);
 }
 
-function modalityColumnRender(data, type, row) {
-  if (type == 'display') {
-    return data?.toUpperCase();
-  }
-  return data;
-}
-
-function stateColumnRender(data, type, row) {
-  if (type == 'display') {
-    return data?.toUpperCase();
-  }
-  return data;
-}
-
-function pwdColumnRender(data, type, row) {
-  if (type == 'display') {
-    return data ? 'SIM' : 'NÃO';
-  }
-  return data;
-}
-
-function publicationColumnRender(data, type, row) {
-  if (type == 'display') {
+function dateColumnRenderer(data, type, row) {
+  const renderer = (data, type, row) => {
     const DateTime = luxon.DateTime;
     return DateTime.fromISO(data).toLocaleString(DateTime.DATE_SHORT);
-  }
-  return data;
-}
-
-function upperCaseColumnRender(data, type, row) {
-  if (type == 'display') {
-    return data?.toUpperCase();
-  }
-  return data;
-}
-
-function numberColumnRender(data, type, row) {
-  if (type == 'display') {
-    const formatter = new Intl.NumberFormat('pt-BR', { style: 'decimal' });
-    return formatter.format(data);
-  }
-  return data;
+  };
+  return configureColumnRenderer(data, type, row, renderer);
 }

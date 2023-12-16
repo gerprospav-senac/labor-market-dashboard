@@ -11,8 +11,8 @@ function buildGeographicDistribution() {
   buildMapChart('chart-geographic-distribution', dataset);
 
   const columns = [
-    { title: 'Estado', data: 'label', render: upperCaseColumnRender },
-    { title: 'Número de vagas', data: 'value', render: numberColumnRender },
+    { title: 'Estado', data: 'label', render: upperCaseColumnRenderer },
+    { title: 'Número de vagas', data: 'value', render: numberColumnRenderer },
   ];
   const columnDefs = [{ width: '50%', targets: 1 }];
   const order = [[ 1, 'desc' ]];
@@ -51,8 +51,8 @@ function buildHighlightTitlesApprentice() {
   
   const dataset = buildHighlightTitlesApprenticeDataset();
   const columns = [
-    { title: 'Título', data: 'label', render: upperCaseColumnRender },
-    { title: 'Número de vagas', data: 'value', render: numberColumnRender },
+    { title: 'Título', data: 'label', render: upperCaseColumnRenderer },
+    { title: 'Número de vagas', data: 'value', render: numberColumnRenderer },
   ];
   const columnDefs = [{ width: '50%', targets: 1 }];
   const order = [[ 1, 'desc' ]];
@@ -64,8 +64,8 @@ function buildHighlightTitlesTechnician() {
   
   const dataset = buildHighlightTitlesTechnicianDataset();
   const columns = [
-    { title: 'Título', data: 'label', render: upperCaseColumnRender },
-    { title: 'Número de vagas', data: 'value', render: numberColumnRender },
+    { title: 'Título', data: 'label', render: upperCaseColumnRenderer },
+    { title: 'Número de vagas', data: 'value', render: numberColumnRenderer },
   ];
   const columnDefs = [{ width: '50%', targets: 1 }];
   const order = [[ 1, 'desc' ]];
@@ -77,8 +77,8 @@ function buildHighlightTitlesOthers() {
 
   const dataset = buildHighlightTitlesOthersDataset();
   const columns = [
-    { title: 'Título', data: 'label', render: upperCaseColumnRender },
-    { title: 'Número de vagas', data: 'value', render: numberColumnRender },
+    { title: 'Título', data: 'label', render: upperCaseColumnRenderer },
+    { title: 'Número de vagas', data: 'value', render: numberColumnRenderer },
   ];
   const columnDefs = [{ width: '50%', targets: 1 }];
   const order = [[ 1, 'desc' ]];
@@ -150,50 +150,75 @@ function buildVacancyProfilePWDDataset() {
 }
 
 function buildHighlightTitlesApprenticeStateDataset() {
-  const evaluatorFn = value => typeof value === 'string' && value.toLowerCase().includes('aprendiz');
-  const filtered = laborMarketDataset.filter(item => evaluatorFn(item['TITLE']));
-  return [
-    { label: 'São Paulo', value: 10 },
-    { label: 'Rio de Janeiro', value: 8 },
-    { label: 'Acre', value: 4 }
-  ];
+  const filtered = laborMarketDataset.filter(item => {
+    return typeof item['TITLE'] === 'string' && item['TITLE'].toLowerCase().includes('aprendiz');
+  });
+
+  const evaluatorFn = (item, other) => item.name === other['LOCATION (STATE)'];
+  const counterFn = item => filtered.filter(other => evaluatorFn(item, other)).length;
+  const formatterFn = item => ({ id: `BR-${item.abbreviation}`, label: item.name, value: counterFn(item) });
+  return brazilianGeographyDataset.map(formatterFn).sort((item, other) => other.value - item.value).slice(0, 3);
 }
 
 function buildHighlightTitlesApprenticeDataset() {
-  const evaluatorFn = value => typeof value === 'string' && value.toLowerCase().includes('aprendiz');
-  const filtered = laborMarketDataset.filter(item => evaluatorFn(item['TITLE']));
-  return [];
+  const filtered = laborMarketDataset.filter(item => {
+    return typeof item['TITLE'] === 'string' && item['TITLE'].toLowerCase().includes('aprendiz');
+  });
+
+  const titles = filtered.map(item => item['TITLE']).sort();
+  const unique = [...new Set(titles)];
+
+  const counterFn = item => titles.filter(other => other === item).length;
+  const formatterFn = item => ({ label: item, value: counterFn(item) });
+  return unique.map(formatterFn);
 }
 
 function buildHighlightTitlesTechnicianStateDataset() {
-  const evaluatorFn = value => typeof value === 'string' && value.toLowerCase().startsWith('técnico');
-  const filtered = laborMarketDataset.filter(item => evaluatorFn(item['TITLE']));
-  return [
-    { label: 'São Paulo', value: 10 },
-    { label: 'Rio de Janeiro', value: 8 },
-    { label: 'Acre', value: 4 }
-  ];
+  const filtered = laborMarketDataset.filter(item => {
+    return typeof item['TITLE'] === 'string' && item['TITLE'].toLowerCase().startsWith('técnico');
+  });
+
+  const evaluatorFn = (item, other) => item.name === other['LOCATION (STATE)'];
+  const counterFn = item => filtered.filter(other => evaluatorFn(item, other)).length;
+  const formatterFn = item => ({ id: `BR-${item.abbreviation}`, label: item.name, value: counterFn(item) });
+  return brazilianGeographyDataset.map(formatterFn).sort((item, other) => other.value - item.value).slice(0, 3);
 }
 
 function buildHighlightTitlesTechnicianDataset() {
-  const evaluatorFn = value => typeof value === 'string' && value.toLowerCase().startsWith('técnico');
-  const filtered = laborMarketDataset.filter(item => evaluatorFn(item['TITLE']));
-  return [];
+  const filtered = laborMarketDataset.filter(item => {
+    return typeof item['TITLE'] === 'string' && item['TITLE'].toLowerCase().startsWith('técnico');
+  });
+  
+  const titles = filtered.map(item => item['TITLE']).sort();
+  const unique = [...new Set(titles)];
+
+  const counterFn = item => titles.filter(other => other === item).length;
+  const formatterFn = item => ({ label: item, value: counterFn(item) });
+  return unique.map(formatterFn);
 }
 
 function buildHighlightTitlesOthersStateDataset() {
-  // TO DO: filtro não contém aprendiz e não começa por técnico
-  // TO DO: contar quantidade de vagas por estado
-  return [
-    { label: 'São Paulo', value: 10 },
-    { label: 'Rio de Janeiro', value: 8 },
-    { label: 'Acre', value: 4 }
-  ];
+  const filtered = laborMarketDataset.filter(item => {
+    return typeof item['TITLE'] === 'string' && !item['TITLE'].toLowerCase().includes('aprendiz') && !item['TITLE'].toLowerCase().startsWith('técnico');
+  });
+
+  const evaluatorFn = (item, other) => item.name === other['LOCATION (STATE)'];
+  const counterFn = item => filtered.filter(other => evaluatorFn(item, other)).length;
+  const formatterFn = item => ({ id: `BR-${item.abbreviation}`, label: item.name, value: counterFn(item) });
+  return brazilianGeographyDataset.map(formatterFn).sort((item, other) => other.value - item.value).slice(0, 3);
 }
 
 function buildHighlightTitlesOthersDataset() {
-  // TO DO: filtro não contém aprendiz e não começa por técnico
-  return [];
+  const filtered = laborMarketDataset.filter(item => {
+    return typeof item['TITLE'] === 'string' && !item['TITLE'].toLowerCase().includes('aprendiz') && !item['TITLE'].toLowerCase().startsWith('técnico');
+  });
+  
+  const titles = filtered.map(item => item['TITLE']).sort();
+  const unique = [...new Set(titles)];
+
+  const counterFn = item => titles.filter(other => other === item).length;
+  const formatterFn = item => ({ label: item, value: counterFn(item) });
+  return unique.map(formatterFn);
 }
 
 function buildHighlightTitlesBoxes(id, dataset) {
