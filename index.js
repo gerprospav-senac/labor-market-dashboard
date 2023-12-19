@@ -106,7 +106,9 @@ function buildHighlightEmployersDataset() {
 
   const counterFn = item => companies.filter(other => other === item).length;
   const formatterFn = item => ({ label: item, value: counterFn(item) });
-  return unique.map(formatterFn).sort((item, other) => other.value - item.value).slice(0, 10);
+  const ascendingSorterFn = (item, other) => item.value - other.value;
+  const descendingSorterFn = (item, other) => other.value - item.value;
+  return unique.map(formatterFn).sort(descendingSorterFn).slice(0, 10).sort(ascendingSorterFn);
 }
 
 function buildSalaryDistributionDataset() {
@@ -329,6 +331,10 @@ function buildBarChart(id, dataset) {
       am5xy.XYChart.new(root, { layout: root.verticalLayout })
     );
 
+    const cursor = chart.set('cursor', am5xy.XYCursor.new(root, {}));
+    cursor.lineX.set('visible', false);
+    cursor.lineY.set('visible', false);
+
     var yRenderer = am5xy.AxisRendererY.new(
       root,
       {
@@ -353,7 +359,7 @@ function buildBarChart(id, dataset) {
         min: 0,
         renderer: am5xy.AxisRendererX.new(root, {
           strokeOpacity: 0.1,
-          minGridDistance:70
+          minGridDistance: 70
         })
       })
     );
@@ -367,18 +373,14 @@ function buildBarChart(id, dataset) {
       sequencedInterpolation: true,
       tooltip: am5.Tooltip.new(root, {
         pointerOrientation: 'horizontal',
-        labelText: '{categoryY}: {valueX}'
+        labelText: '{valueX}'
       })
     }));
     
     series1.columns.template.setAll({ height: am5.percent(70) });
-
-    const cursor = chart.set('cursor', am5xy.XYCursor.new(root, { behavior: 'zoomY' }));
-    cursor.lineX.set('visible', false);
-    cursor.lineY.set('visible', false);
-    
     series1.data.setAll(dataset);
     series1.appear();
+
     chart.appear(1000, 100);
   });
 }
