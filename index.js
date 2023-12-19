@@ -264,30 +264,29 @@ function buildMapChart(id, dataset) {
     const chart = root.container.children.push(
       am5map.MapChart.new(
         root,
-        { panX: 'rotateX', projection: am5map.geoMercator(), layout: root.horizontalLayout }
+        {
+          panX: 'rotateX',
+          projection: am5map.geoMercator(),
+          layout: root.horizontalLayout
+        }
       )
     );
 
     const polygonSeries = chart.series.push(
-      am5map.MapPolygonSeries.new(
-        root,
-        { calculateAggregates: true, valueField: 'value' }
-      )
+      am5map.MapPolygonSeries.new(root, { calculateAggregates: true, valueField: 'value' })
     );
     
     polygonSeries.mapPolygons.template.setAll({ tooltipText: '{name}', interactive: true });
-    polygonSeries.mapPolygons.template.states.create('hover', { fill: am5.color(0x677935) });
-    
-    polygonSeries.set("heatRules", [{
+    polygonSeries.set('heatRules', [{
       target: polygonSeries.mapPolygons.template,
-      dataField: "value",
-      min: am5.color(0x8ab7ff),
-      max: am5.color(0x25529a),
-      key: "fill"
+      dataField: 'value',
+      min: am5.color(0xff621f),
+      max: am5.color(0x661f00),
+      key: 'fill'
     }]);
     
-    polygonSeries.mapPolygons.template.events.on("pointerover", function(ev) {
-      heatLegend.showValue(ev.target.dataItem.get("value"));
+    polygonSeries.mapPolygons.template.events.on('pointerover', function(ev) {
+      heatLegend.showValue(ev.target.dataItem.get('value'));
     });
     
     const heatLegend = chart.children.push(
@@ -295,8 +294,8 @@ function buildMapChart(id, dataset) {
         root,
         {
           orientation: 'vertical',
-          startColor: am5.color(0x8ab7ff),
-          endColor: am5.color(0x25529a),
+          startColor: am5.color(0xff621f),
+          endColor: am5.color(0x661f00),
           startText: 'Menos vagas',
           endText: 'Mais vagas',
           stepCount: 5
