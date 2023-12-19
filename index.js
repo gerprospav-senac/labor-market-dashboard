@@ -4,6 +4,9 @@ document.addEventListener("DOMContentLoaded", function(event) {
   buildSalaryDistribution();
   buildVacancyProfile();
   buildHighlightTitles();
+
+  // Refactoring
+  document.getElementById('loading').style.display = 'none';
 });
 
 function buildGeographicDistribution() {
@@ -113,15 +116,15 @@ function buildSalaryDistributionDataset() {
 
   const counterFn = (min, max) => filtered.filter(item => item >= min && item <= max).length;
   return [
-    { label: 'Até 1.000', value: counterFn(0, 1000) },
-    { label: '1.001 a 1.500', value: counterFn(1001, 1500) },
-    { label: '1.501 a 2.000', value: counterFn(1501, 2000) },
-    { label: '2.001 a 3.000', value: counterFn(2001, 3000) },
-    { label: '3.001 a 4.000', value: counterFn(3001, 4000) },
-    { label: '4.001 a 5.000', value: counterFn(4001, 5000) },
-    { label: '5.001 a 7.000', value: counterFn(5001, 7000) },
-    { label: '7.001 a 10.000', value: counterFn(7001, 10000) },
-    { label: 'Acima de 10.001', value: counterFn(10001, 30000) }
+    { label: 'Até R$ 1.000', value: counterFn(0, 1000) },
+    { label: 'R$ 1.001 a R$ 1.500', value: counterFn(1001, 1500) },
+    { label: 'R$ 1.501 a R$ 2.000', value: counterFn(1501, 2000) },
+    { label: 'R$ 2.001 a R$ 3.000', value: counterFn(2001, 3000) },
+    { label: 'R$ 3.001 a R$ 4.000', value: counterFn(3001, 4000) },
+    { label: 'R$ 4.001 a R$ 5.000', value: counterFn(4001, 5000) },
+    { label: 'R$ 5.001 a R$ 7.000', value: counterFn(5001, 7000) },
+    { label: 'R$ 7.001 a R$ 10.000', value: counterFn(7001, 10000) },
+    { label: 'Acima de R$ 10.001', value: counterFn(10001, 30000) }
   ];
 }
 
@@ -254,6 +257,7 @@ function buildMapChart(id, dataset) {
     am5plugins_exporting.Exporting.new(root, { menu: exportingMenu });
 
     root.setThemes([am5themes_Animated.new(root)]);
+    root.locale = am5locales_pt_BR;
     
     const chart = root.container.children.push(
       am5map.MapChart.new(
@@ -319,19 +323,10 @@ function buildBarChart(id, dataset) {
     am5plugins_exporting.Exporting.new(root, { menu: exportingMenu });
 
     root.setThemes([am5themes_Animated.new(root)]);
+    root.locale = am5locales_pt_BR;
     
-    var chart = root.container.children.push(
-      am5xy.XYChart.new(
-        root,
-        {
-          panX: false,
-          panY: false,
-          wheelX: 'panX',
-          wheelY: 'zoomX',
-          paddingLeft: 0,
-          layout: root.verticalLayout
-        }
-      )
+    const chart = root.container.children.push(
+      am5xy.XYChart.new(root, { layout: root.verticalLayout })
     );
 
     var yRenderer = am5xy.AxisRendererY.new(
@@ -396,21 +391,9 @@ function buildColumnChart(id, dataset) {
     am5plugins_exporting.Exporting.new(root, { menu: exportingMenu });
 
     root.setThemes([am5themes_Animated.new(root)]);
+    root.locale = am5locales_pt_BR;
     
-    const chart = root.container.children.push(
-      am5xy.XYChart.new(
-        root,
-        {
-          panX: true,
-          panY: true,
-          wheelX: 'panX',
-          wheelY: 'zoomX',
-          pinchZoomX: true,
-          paddingLeft: 0,
-          paddingRight: 1
-        }
-      )
-    );
+    const chart = root.container.children.push(am5xy.XYChart.new(root, {}));
     
     const cursor = chart.set('cursor', am5xy.XYCursor.new(root, {}));
     cursor.lineX.set('visible', false);
@@ -477,6 +460,7 @@ function buildPieChart(id, dataset) {
       am5themes_Animated.new(root),
       am5themes_Responsive.new(root)
     ]);
+    root.locale = am5locales_pt_BR;
     
     const chart = root.container.children.push(
       am5percent.PieChart.new(root, { layout: root.horizontalLayout })
@@ -510,7 +494,7 @@ function buildPieChart(id, dataset) {
           maxWidth: availableSpace
         });
       }
-    )
+    );
 
     series.appear(1000, 100);
   });

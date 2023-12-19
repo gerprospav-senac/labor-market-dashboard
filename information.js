@@ -1,6 +1,9 @@
 document.addEventListener("DOMContentLoaded", function(event) {
   buildVacancyBoxes();
   buildVacancyList();
+
+  // Refactoring
+  document.getElementById('loading').style.display = 'none';
 });
 
 function buildVacancyBoxes() {
