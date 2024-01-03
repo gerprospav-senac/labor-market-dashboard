@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
   buildHighlightTitles();
 
   // Refactoring
-  document.getElementById('loading').style.display = 'none';
+  document.querySelector('div.loading').style.display = 'none';
 });
 
 function buildGeographicDistribution() {

@@ -39,7 +39,7 @@
   height: 300px;
 }
 
-#loading {
+.loading {
   display: block;
   position: fixed;
   z-index: 2000;
@@ -47,5 +47,40 @@
   left: 0;
   height: 100%;
   width: 100%;
-  background: rgba(0, 121, 74, 1) url('loading.gif') 50% 50% no-repeat;
+  background: rgba(0, 121, 74, 1);
+}
+
+.loading > .loading-body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+
+/* Extra small devices */
+.loading > .loading-body > .loading-logo { max-width: 150px; }
+.loading > .loading-body > .loading-animation { max-width: 75px; }
+
+/* Small devices (landscape phones, 576px and up) */
+@media (min-width: 576px) {
+  .loading > .loading-body > .loading-logo { max-width: 200px; }
+  .loading > .loading-body > .loading-animation { max-width: 100px; }
+}
+
+/* Medium devices (tablets, 768px and up) */
+@media (min-width: 768px) {
+  .loading > .loading-body > .loading-logo { max-width: 300px; }
+  .loading > .loading-body > .loading-animation { max-width: 150px; }
+}
+
+/* Large devices (desktops, 992px and up) */
+@media (min-width: 992px) {
+  .loading > .loading-body > .loading-logo { max-width: 300px; }
+  .loading > .loading-body > .loading-animation { max-width: 150px; }
+}
+
+/* Extra large devices (large desktops, 1200px and up) */
+@media (min-width: 1200px) {
+  .loading > .loading-body > .loading-logo { max-width: 300px; }
+  .loading > .loading-body > .loading-animation { max-width: 150px; }
 }
