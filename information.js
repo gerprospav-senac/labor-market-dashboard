@@ -1,14 +1,15 @@
 document.addEventListener("DOMContentLoaded", function(event) {
-  buildVacancyBoxes();
-  buildVacancyList();
+  $.getJSON('dataset/dataset-labor-market.json', function(laborMarketDataset) {
+    buildVacancyBoxes(laborMarketDataset);
+    buildVacancyList(laborMarketDataset);
 
-  // Refactoring
-  document.querySelector('div.loading').style.display = 'none';
+    document.querySelector('div.loading').style.display = 'none';
+  });
 });
 
-function buildVacancyBoxes() {
-  const formatter = new Intl.NumberFormat('pt-BR', { style: 'decimal' });
+function buildVacancyBoxes(laborMarketDataset) {
   const value = Array.isArray(laborMarketDataset) ? laborMarketDataset.length : undefined;
+  const formatter = new Intl.NumberFormat('pt-BR', { style: 'decimal' });
   
   const displayed = document.querySelector('div#vacancies-displayed > div.inner > h3');
   if (displayed) {
@@ -21,12 +22,12 @@ function buildVacancyBoxes() {
   }
 }
 
-function buildVacancyList() {
+function buildVacancyList(laborMarketDataset) {
   let dataset = [];
   if (Array.isArray(laborMarketDataset)) {
     dataset = laborMarketDataset.map(item => ({
       ...item,
-      'COMPANY': ['', '********'].includes(item['COMPANY']) ? 'Confidencial' : item['COMPANY']
+      'COMPANY': ['', '********', 'Confidencial O que é isso?'].includes(item['COMPANY']) ? 'Confidencial' : item['COMPANY']
     }));
   }
 

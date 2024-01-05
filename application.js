@@ -57,7 +57,7 @@ function configureColumnRenderer(data, type, row, renderer) {
 }
 
 function upperCaseColumnRenderer(data, type, row) {
-  const renderer = (data, type, row) => data?.toUpperCase();
+  const renderer = (data, type, row) => typeof data === 'string' ? data?.toUpperCase() : undefined;
   return configureColumnRenderer(data, type, row, renderer);
 }
 

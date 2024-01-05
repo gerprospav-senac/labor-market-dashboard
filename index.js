@@ -1,107 +1,141 @@
 document.addEventListener("DOMContentLoaded", function(event) {
-  buildGeographicDistribution();
-  buildHighlightEmployers();
-  buildSalaryDistribution();
-  buildVacancyProfile();
-  buildHighlightTitles();
+  $.getJSON('dataset/dataset-labor-market.json', function(laborMarketDataset) {
+    buildGeographicDistribution(laborMarketDataset);
+    buildHighlightEmployers(laborMarketDataset);
+    buildSalaryDistribution(laborMarketDataset);
+    buildVacancyProfile(laborMarketDataset);
+    buildHighlightTitles(laborMarketDataset);
 
-  // Refactoring
-  document.querySelector('div.loading').style.display = 'none';
+    document.querySelector('div.loading').style.display = 'none';
+  });
 });
 
-function buildGeographicDistribution() {
-  const dataset = buildGeographicDistribuitionDataset();
+function buildGeographicDistribution(laborMarketDataset) {
+  const dataset = buildGeographicDistribuitionDataset(laborMarketDataset);
   buildMapChart('chart-geographic-distribution', dataset);
 
   const columns = [
     { title: 'Estado', data: 'label', render: upperCaseColumnRenderer },
-    { title: 'Número de vagas', data: 'value', render: numberColumnRenderer },
+    { title: 'N.º de vagas', data: 'value', render: numberColumnRenderer },
+    { title: 'Título destacado', data: 'title', render: upperCaseColumnRenderer },
+    { title: 'N.º de postagens', data: 'posts', render: numberColumnRenderer },
+    { title: 'N.º de contratantes', data: 'contractors', render: numberColumnRenderer },
   ];
-  const columnDefs = [{ width: '50%', targets: 1 }];
+  const columnDefs = [];
   const order = [[ 1, 'desc' ]];
   buildDataTables('#datatable-geographic-distribution', dataset, columns, columnDefs, order);
 }
 
-function buildHighlightEmployers() {
-  const dataset = buildHighlightEmployersDataset();
+function buildHighlightEmployers(laborMarketDataset) {
+  const dataset = buildHighlightEmployersDataset(laborMarketDataset);
   buildBarChart('chart-highlight-employers', dataset);
 }
 
-function buildSalaryDistribution() {
-  const dataset = buildSalaryDistributionDataset();
+function buildSalaryDistribution(laborMarketDataset) {
+  const dataset = buildSalaryDistributionDataset(laborMarketDataset);
   buildColumnChart('chart-salary-distribution', dataset);
 }
 
-function buildVacancyProfile() {
-  const datasetRelationship = buildVacancyProfileRelationshipDataset();
+function buildVacancyProfile(laborMarketDataset) {
+  const datasetRelationship = buildVacancyProfileRelationshipDataset(laborMarketDataset);
   buildPieChart('chart-vacancy-profile-relationship', datasetRelationship);
 
-  const datasetModality = buildVacancyProfileModalityDataset();
+  const datasetModality = buildVacancyProfileModalityDataset(laborMarketDataset);
   buildPieChart('chart-vacancy-profile-modality', datasetModality);
 
-  const datasetPWD = buildVacancyProfilePWDDataset();
+  const datasetPWD = buildVacancyProfilePWDDataset(laborMarketDataset);
   buildPieChart('chart-vacancy-profile-pwd', datasetPWD);
 }
 
-function buildHighlightTitles() {
-  buildHighlightTitlesApprentice();
-  buildHighlightTitlesTechnician();
-  buildHighlightTitlesOthers();
+function buildHighlightTitles(laborMarketDataset) {
+  buildHighlightTitlesApprentice(laborMarketDataset);
+  buildHighlightTitlesTechnician(laborMarketDataset);
+  buildHighlightTitlesOthers(laborMarketDataset);
 }
-function buildHighlightTitlesApprentice() {
-  const datasetOrderedStates = buildHighlightTitlesApprenticeStateDataset();
+
+function buildHighlightTitlesApprentice(laborMarketDataset) {
+  const datasetOrderedStates = buildHighlightTitlesApprenticeStateDataset(laborMarketDataset);
   buildHighlightTitlesBoxes('highlight-titles-apprentice', datasetOrderedStates);
   
-  const dataset = buildHighlightTitlesApprenticeDataset();
+  const dataset = buildHighlightTitlesApprenticeDataset(laborMarketDataset);
   const columns = [
     { title: 'Título', data: 'label', render: upperCaseColumnRenderer },
-    { title: 'Número de vagas', data: 'value', render: numberColumnRenderer },
+    { title: 'N.º de vagas', data: 'value', render: numberColumnRenderer },
   ];
   const columnDefs = [{ width: '50%', targets: 1 }];
   const order = [[ 1, 'desc' ]];
   buildDataTables('#datatable-highlight-titles-apprentice', dataset, columns, columnDefs, order);
 }
-function buildHighlightTitlesTechnician() {
-  const datasetOrderedStates = buildHighlightTitlesTechnicianStateDataset();
+
+function buildHighlightTitlesTechnician(laborMarketDataset) {
+  const datasetOrderedStates = buildHighlightTitlesTechnicianStateDataset(laborMarketDataset);
   buildHighlightTitlesBoxes('highlight-titles-technician', datasetOrderedStates);
   
-  const dataset = buildHighlightTitlesTechnicianDataset();
+  const dataset = buildHighlightTitlesTechnicianDataset(laborMarketDataset);
   const columns = [
     { title: 'Título', data: 'label', render: upperCaseColumnRenderer },
-    { title: 'Número de vagas', data: 'value', render: numberColumnRenderer },
+    { title: 'N.º de vagas', data: 'value', render: numberColumnRenderer },
   ];
   const columnDefs = [{ width: '50%', targets: 1 }];
   const order = [[ 1, 'desc' ]];
   buildDataTables('#datatable-highlight-titles-technician', dataset, columns, columnDefs, order);
 }
-function buildHighlightTitlesOthers() {
-  const datasetOrderedStates = buildHighlightTitlesOthersStateDataset();
+
+function buildHighlightTitlesOthers(laborMarketDataset) {
+  const datasetOrderedStates = buildHighlightTitlesOthersStateDataset(laborMarketDataset);
   buildHighlightTitlesBoxes('highlight-titles-others', datasetOrderedStates);
 
-  const dataset = buildHighlightTitlesOthersDataset();
+  const dataset = buildHighlightTitlesOthersDataset(laborMarketDataset);
   const columns = [
     { title: 'Título', data: 'label', render: upperCaseColumnRenderer },
-    { title: 'Número de vagas', data: 'value', render: numberColumnRenderer },
+    { title: 'N.º de vagas', data: 'value', render: numberColumnRenderer },
   ];
   const columnDefs = [{ width: '50%', targets: 1 }];
   const order = [[ 1, 'desc' ]];
   buildDataTables('#datatable-highlight-titles-others', dataset, columns, columnDefs, order);
 }
 
-function buildGeographicDistribuitionDataset() {
+function buildGeographicDistribuitionDataset(laborMarketDataset) {
+  const highlight = (state) => {
+    const filtered = laborMarketDataset.filter(item => state === item['LOCATION (STATE)']);
+    const titles = filtered.map(item => item['TITLE'].toUpperCase()).sort();
+    const unique = [...new Set(titles)];
+    const counterFn = item => titles.filter(other => other === item).length;
+    const formatterFn = item => ({ label: item, value: counterFn(item) });
+    const descendingSorterFn = (item, other) => other.value - item.value;
+    const [highlighted] = unique.map(formatterFn).sort(descendingSorterFn);
+    const contractors = title => {
+      const companies = filtered.map(item => ({
+        ...item,
+        'COMPANY': ['', '********', 'Confidencial O que é isso?'].includes(item['COMPANY']) ? 'Confidencial' : item['COMPANY']
+      }))
+      .filter(item => title.toUpperCase() === item['TITLE'].toUpperCase())
+      .map(item => item['COMPANY'].toUpperCase()).sort();
+      return [...new Set(companies)].length;
+    };
+    return { title: highlighted.label, posts: highlighted.value, contractors: contractors(highlighted.label) };
+  };
+  
   const evaluatorFn = (item, other) => item.name === other['LOCATION (STATE)'];
   const counterFn = item => laborMarketDataset.filter(other => evaluatorFn(item, other)).length;
-  const formatterFn = item => ({ id: `BR-${item.abbreviation}`, label: item.name, value: counterFn(item) });
-  return brazilianGeographyDataset.map(formatterFn);
+  
+  return brazilianGeographyDataset.map(item => {
+    return {
+      id: `BR-${item.abbreviation}`,
+      label: item.name,
+      value: counterFn(item),
+      ...highlight(item.name)
+    };
+  });
 }
 
-function buildHighlightEmployersDataset() {
+function buildHighlightEmployersDataset(laborMarketDataset) {
   const filtered = laborMarketDataset.map(item => ({
     ...item,
-    'COMPANY': ['', '********'].includes(item['COMPANY']) ? 'Confidencial' : item['COMPANY']
+    'COMPANY': ['', '********', 'Confidencial O que é isso?'].includes(item['COMPANY']) ? 'Confidencial' : item['COMPANY']
   })).filter(item => item['COMPANY'].toLowerCase() !== 'confidencial');
 
-  const companies = filtered.map(item => item['COMPANY']).sort();
+  const companies = filtered.map(item => item['COMPANY'].toUpperCase()).sort();
   const unique = [...new Set(companies)];
 
   const counterFn = item => companies.filter(other => other === item).length;
@@ -111,7 +145,7 @@ function buildHighlightEmployersDataset() {
   return unique.map(formatterFn).sort(descendingSorterFn).slice(0, 10).sort(ascendingSorterFn);
 }
 
-function buildSalaryDistributionDataset() {
+function buildSalaryDistributionDataset(laborMarketDataset) {
   const available = laborMarketDataset.filter(item => item['SALARY (AVAILABLE)'] === true);
   const salaries = available.map(item => item['SALARY (MIN)']);
   const filtered = salaries.filter(item => item > 300 && item < 30000);
@@ -130,7 +164,7 @@ function buildSalaryDistributionDataset() {
   ];
 }
 
-function buildVacancyProfileRelationshipDataset() {
+function buildVacancyProfileRelationshipDataset(laborMarketDataset) {
   const relationships = laborMarketDataset.map(item => item['RELATIONSHIP']).sort();
   const unique = [...new Set(relationships)];
 
@@ -139,7 +173,7 @@ function buildVacancyProfileRelationshipDataset() {
   return unique.map(formatterFn);
 }
 
-function buildVacancyProfileModalityDataset() {
+function buildVacancyProfileModalityDataset(laborMarketDataset) {
   const homeoffice = laborMarketDataset.filter(item => item['MODALITY (NORMALIZED)'] === 'home office');
   return [
     { label: 'Presencial', value: laborMarketDataset.length - homeoffice.length },
@@ -147,7 +181,7 @@ function buildVacancyProfileModalityDataset() {
   ];
 }
 
-function buildVacancyProfilePWDDataset() {
+function buildVacancyProfilePWDDataset(laborMarketDataset) {
   const pwd = laborMarketDataset.filter(item => item['PWD'] === true);
   return [
     { label: 'Padrão', value: laborMarketDataset.length - pwd.length },
@@ -155,10 +189,9 @@ function buildVacancyProfilePWDDataset() {
   ];
 }
 
-function buildHighlightTitlesApprenticeStateDataset() {
-  const filtered = laborMarketDataset.filter(item => {
-    return typeof item['TITLE'] === 'string' && item['TITLE'].toLowerCase().includes('aprendiz');
-  });
+function buildHighlightTitlesApprenticeStateDataset(laborMarketDataset) {
+  const filterFn = item => typeof item['TITLE'] === 'string' && item['TITLE'].toLowerCase().includes('aprendiz');
+  const filtered = laborMarketDataset.filter(filterFn);
 
   const evaluatorFn = (item, other) => item.name === other['LOCATION (STATE)'];
   const counterFn = item => filtered.filter(other => evaluatorFn(item, other)).length;
@@ -166,23 +199,23 @@ function buildHighlightTitlesApprenticeStateDataset() {
   return brazilianGeographyDataset.map(formatterFn).sort((item, other) => other.value - item.value).slice(0, 3);
 }
 
-function buildHighlightTitlesApprenticeDataset() {
-  const filtered = laborMarketDataset.filter(item => {
-    return typeof item['TITLE'] === 'string' && item['TITLE'].toLowerCase().includes('aprendiz');
-  });
+function buildHighlightTitlesApprenticeDataset(laborMarketDataset) {
+  const formatterFn = item => typeof item['TITLE'] === 'string' ? item['TITLE'].toLowerCase() : undefined;
+  const formatted = laborMarketDataset.map(formatterFn);
 
-  const titles = filtered.map(item => item['TITLE']).sort();
+  const filterFn = item => typeof item === 'string' && item.includes('aprendiz');
+  const filtered = formatted.filter(filterFn);
+
+  const titles = filtered.sort();
   const unique = [...new Set(titles)];
 
   const counterFn = item => titles.filter(other => other === item).length;
-  const formatterFn = item => ({ label: item, value: counterFn(item) });
-  return unique.map(formatterFn);
+  return unique.map(item => ({ label: item, value: counterFn(item) }));
 }
 
-function buildHighlightTitlesTechnicianStateDataset() {
-  const filtered = laborMarketDataset.filter(item => {
-    return typeof item['TITLE'] === 'string' && item['TITLE'].toLowerCase().startsWith('técnico');
-  });
+function buildHighlightTitlesTechnicianStateDataset(laborMarketDataset) {
+  const filterFn = item => typeof item['TITLE'] === 'string' && item['TITLE'].toLowerCase().startsWith('técnico');
+  const filtered = laborMarketDataset.filter(filterFn);
 
   const evaluatorFn = (item, other) => item.name === other['LOCATION (STATE)'];
   const counterFn = item => filtered.filter(other => evaluatorFn(item, other)).length;
@@ -190,23 +223,23 @@ function buildHighlightTitlesTechnicianStateDataset() {
   return brazilianGeographyDataset.map(formatterFn).sort((item, other) => other.value - item.value).slice(0, 3);
 }
 
-function buildHighlightTitlesTechnicianDataset() {
-  const filtered = laborMarketDataset.filter(item => {
-    return typeof item['TITLE'] === 'string' && item['TITLE'].toLowerCase().startsWith('técnico');
-  });
+function buildHighlightTitlesTechnicianDataset(laborMarketDataset) {
+  const formatterFn = item => typeof item['TITLE'] === 'string' ? item['TITLE'].toLowerCase() : undefined;
+  const formatted = laborMarketDataset.map(formatterFn);
+
+  const filterFn = item => typeof item === 'string' && item.startsWith('técnico');
+  const filtered = formatted.filter(filterFn);
   
-  const titles = filtered.map(item => item['TITLE']).sort();
+  const titles = filtered.sort();
   const unique = [...new Set(titles)];
 
   const counterFn = item => titles.filter(other => other === item).length;
-  const formatterFn = item => ({ label: item, value: counterFn(item) });
-  return unique.map(formatterFn);
+  return unique.map(item => ({ label: item, value: counterFn(item) }));
 }
 
-function buildHighlightTitlesOthersStateDataset() {
-  const filtered = laborMarketDataset.filter(item => {
-    return typeof item['TITLE'] === 'string' && !item['TITLE'].toLowerCase().includes('aprendiz') && !item['TITLE'].toLowerCase().startsWith('técnico');
-  });
+function buildHighlightTitlesOthersStateDataset(laborMarketDataset) {
+  const filterFn = item => typeof item['TITLE'] === 'string' && !item['TITLE'].toLowerCase().includes('aprendiz') && !item['TITLE'].toLowerCase().startsWith('técnico');
+  const filtered = laborMarketDataset.filter(filterFn);
 
   const evaluatorFn = (item, other) => item.name === other['LOCATION (STATE)'];
   const counterFn = item => filtered.filter(other => evaluatorFn(item, other)).length;
@@ -214,17 +247,18 @@ function buildHighlightTitlesOthersStateDataset() {
   return brazilianGeographyDataset.map(formatterFn).sort((item, other) => other.value - item.value).slice(0, 3);
 }
 
-function buildHighlightTitlesOthersDataset() {
-  const filtered = laborMarketDataset.filter(item => {
-    return typeof item['TITLE'] === 'string' && !item['TITLE'].toLowerCase().includes('aprendiz') && !item['TITLE'].toLowerCase().startsWith('técnico');
-  });
+function buildHighlightTitlesOthersDataset(laborMarketDataset) {
+  const formatterFn = item => typeof item['TITLE'] === 'string' ? item['TITLE'].toLowerCase() : undefined;
+  const formatted = laborMarketDataset.map(formatterFn);
+
+  const filterFn = item => typeof item === 'string' && !item.includes('aprendiz') && !item.startsWith('técnico');
+  const filtered = formatted.filter(filterFn);
   
-  const titles = filtered.map(item => item['TITLE']).sort();
+  const titles = filtered.sort();
   const unique = [...new Set(titles)];
 
   const counterFn = item => titles.filter(other => other === item).length;
-  const formatterFn = item => ({ label: item, value: counterFn(item) });
-  return unique.map(formatterFn);
+  return unique.map(item => ({ label: item, value: counterFn(item) }));
 }
 
 function buildHighlightTitlesBoxes(id, dataset) {
@@ -276,26 +310,29 @@ function buildMapChart(id, dataset) {
       am5map.MapPolygonSeries.new(root, { calculateAggregates: true, valueField: 'value' })
     );
     
-    polygonSeries.mapPolygons.template.setAll({ tooltipText: '{name}', interactive: true });
+    polygonSeries.mapPolygons.template.setAll({ tooltipText: '{name}: {value}', interactive: true });
     polygonSeries.set('heatRules', [{
       target: polygonSeries.mapPolygons.template,
       dataField: 'value',
-      min: am5.color(0xff621f),
-      max: am5.color(0x661f00),
-      key: 'fill'
+      min: am5.color(0x8ab7ff),
+      max: am5.color(0x25529a),
+      key: 'fill',
+      /*
+      customFunction: (sprite, min, max, value) => {
+        if (true) {
+          sprite.set('fill', am5.color(0x25529a));
+        }
+      }
+      */
     }]);
-    
-    polygonSeries.mapPolygons.template.events.on('pointerover', function(ev) {
-      heatLegend.showValue(ev.target.dataItem.get('value'));
-    });
     
     const heatLegend = chart.children.push(
       am5.HeatLegend.new(
         root,
         {
           orientation: 'vertical',
-          startColor: am5.color(0xff621f),
-          endColor: am5.color(0x661f00),
+          startColor: am5.color(0x8ab7ff),
+          endColor: am5.color(0x25529a),
           startText: 'Menos vagas',
           endText: 'Mais vagas',
           stepCount: 5
