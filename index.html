@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Dashboard - Banco Nacional de Empregos | Dinâmica do Emprego</title>
+    <title>Dashboard | Dinâmica do Emprego</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
     <!-- Import favicon -->
@@ -57,7 +57,7 @@
         <div class="sidebar">
           <nav class="mt-2">
             <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-              <li class="nav-header text-white">Banco Nacional de Empregos</li>
+              <li class="nav-header text-white">Navegação</li>
               <li class="nav-item">
                 <a href="index.html" class="nav-link active">
                   <i class="nav-icon fas fa-tachometer-alt"></i>
@@ -70,32 +70,6 @@
                   <p>Informações</p>
                 </a>
               </li>
-              <li class="nav-header text-white">Infojobs</li>
-              <li class="nav-item">
-                <a href="infojobs-index.html" class="nav-link">
-                  <i class="nav-icon fas fa-tachometer-alt"></i>
-                  <p>Dashboard</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="infojobs-information.html" class="nav-link">
-                  <i class="nav-icon fa-solid fa-circle-info"></i>
-                  <p>Informações</p>
-                </a>
-              </li>
-              <li class="nav-header text-white">Vagas</li>
-              <li class="nav-item">
-                <a href="vagas-index.html" class="nav-link">
-                  <i class="nav-icon fas fa-tachometer-alt"></i>
-                  <p>Dashboard</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="vagas-information.html" class="nav-link">
-                  <i class="nav-icon fa-solid fa-circle-info"></i>
-                  <p>Informações</p>
-                </a>
-              </li>
             </ul>
           </nav>
         </div>
@@ -104,10 +78,19 @@
         <div class="content-header">
           <div class="container-fluid">
             <div class="row mb-2">
-              <div class="col-8">
-                <h1 class="m-0">Dashboard - Banco Nacional de Empregos</h1>
+              <div class="col-6">
+                <h1 class="m-0">Dashboard</h1>
               </div>
-              <div class="col-4 text-right">
+              <div class="col-3">
+                <div class="form-group">
+                  <select id="website-reference" class="form-control">
+                    <option value="BNE" selected>Banco Nacional de Emprego</option>
+                    <option value="INFOJOBS">Infojobs</option>
+                    <option value="VAGAS">Vagas</option>
+                  </select>
+                </div>
+              </div>
+              <div class="col-3">
                 <div class="form-group">
                   <select id="date-reference" class="form-control">
                     <option value="2024-01" selected>Janeiro de 2024</option>
@@ -300,11 +283,6 @@
       </footer>
       <div id="sidebar-overlay"></div>
     </div>
-
-    <!-- Page enviroment -->
-    <script>
-      window.source = 'BNE';
-    </script>
 
     <!-- Import FontAwesome 6.5.1 script -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js" integrity="sha512-GWzVrcGlo0TxTRvz9ttioyYJ+Wwk9Ck0G81D+eO63BaqHaJ3YZX9wuqjwgfcV/MrB2PhaVX9DkYVhbFpStnqpQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>

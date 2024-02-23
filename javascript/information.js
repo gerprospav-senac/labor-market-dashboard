@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
   bootstrap();
 });
 
-document.addEventListener("onDateReferenceChange", function(event) {
+document.addEventListener("onReferenceChange", function(event) {
   document.querySelector('div.loading').style.display = 'block';
 
   const tables = $.fn.dataTable.fnTables();
@@ -16,13 +16,15 @@ document.addEventListener("onDateReferenceChange", function(event) {
 });
 
 function bootstrap() {
-  const source = window?.source?.toLowerCase();
-  console.log(`Data visualization source reference: ${source}`);
+  const website = document.getElementById('website-reference');
+  const websiteValue = website?.value?.toLowerCase();
+  console.log(`Website reference: ${websiteValue}`);
 
-  const reference = document.getElementById('date-reference');
-  console.log(`Data visualization date reference: ${reference?.value}`);
+  const date = document.getElementById('date-reference');
+  const dateValue = date?.value;
+  console.log(`Date reference: ${dateValue}`);
 
-  $.getJSON(`dataset/${source}/dataset-${source}-${reference?.value}.json`, function(laborMarketDataset) {
+  $.getJSON(`dataset/${websiteValue}/dataset-${websiteValue}-${dateValue}.json`, function(laborMarketDataset) {
     buildVacancyBoxes(laborMarketDataset);
     buildVacancyList(laborMarketDataset);
 
