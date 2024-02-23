@@ -131,8 +131,8 @@ function buildGeographicDistribuitionDataset(laborMarketDataset) {
     const titles = filtered.map(item => item['TITLE']?.toUpperCase()).sort();
     const unique = [...new Set(titles)];
 
-    const formatterFn = item => ({ label: item, value: counterFn(item) });
     const counterFn = item => titles.filter(other => other === item).length;
+    const formatterFn = item => ({ label: item, value: counterFn(item) });
     const descendingSorterFn = (item, other) => other?.value - item?.value;
     const [highlighted] = unique.map(formatterFn).sort(descendingSorterFn);
 
@@ -153,7 +153,6 @@ function buildGeographicDistribuitionDataset(laborMarketDataset) {
   
   const evaluatorFn = (item, other) => item.name === other['LOCATION (STATE)'];
   const counterFn = item => laborMarketDataset.filter(other => evaluatorFn(item, other)).length;
-  
   return brazilianGeographyDataset.map(item => {
     return {
       id: `BR-${item.abbreviation}`,
@@ -173,8 +172,8 @@ function buildHighlightEmployersDataset(laborMarketDataset) {
 
   const counterFn = item => companies.filter(other => other === item).length;
   const formatterFn = item => ({ label: item, value: counterFn(item) });
-  const ascendingSorterFn = (item, other) => item.value - other.value;
   const descendingSorterFn = (item, other) => other.value - item.value;
+  const ascendingSorterFn = (item, other) => item.value - other.value;
   return unique.map(formatterFn).sort(descendingSorterFn).slice(0, 10).sort(ascendingSorterFn);
 }
 
@@ -349,14 +348,7 @@ function buildMapChart(id, dataset) {
       dataField: 'value',
       min: am5.color(0x8ab7ff),
       max: am5.color(0x25529a),
-      key: 'fill',
-      /*
-      customFunction: (sprite, min, max, value) => {
-        if (true) {
-          sprite.set('fill', am5.color(0x25529a));
-        }
-      }
-      */
+      key: 'fill'
     }]);
     
     const heatLegend = chart.children.push(
