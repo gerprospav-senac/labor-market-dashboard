@@ -50,7 +50,7 @@ function buildVacancyBoxes(laborMarketDataset) {
 function buildVacancyList(laborMarketDataset) {
   const dataset = Array.isArray(laborMarketDataset) ? laborMarketDataset : [];
   const columns = [
-    { title: 'Título', data: 'TITLE', render: upperCaseColumnRenderer },
+    { title: 'Nome da vaga', data: 'TITLE', render: upperCaseColumnRenderer },
     { title: 'Empresa', data: 'COMPANY', render: upperCaseColumnRenderer },
     { title: 'Salário', data: 'SALARY (MIN)', render: monetaryColumnRenderer },
     { title: 'Vínculo', data: 'RELATIONSHIP', render: upperCaseColumnRenderer },

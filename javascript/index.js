@@ -43,7 +43,7 @@ function buildGeographicDistribution(laborMarketDataset) {
   const columns = [
     { title: 'Estado', data: 'label', render: upperCaseColumnRenderer },
     { title: 'N.º de vagas', data: 'value', render: numberColumnRenderer },
-    { title: 'Título destacado', data: 'title', render: upperCaseColumnRenderer },
+    { title: 'Vaga destacada', data: 'title', render: upperCaseColumnRenderer },
     { title: 'N.º de postagens', data: 'posts', render: numberColumnRenderer },
     { title: 'N.º de contratantes', data: 'contractors', render: numberColumnRenderer },
   ];
@@ -85,7 +85,7 @@ function buildHighlightTitlesApprentice(laborMarketDataset) {
   
   const dataset = buildHighlightTitlesApprenticeDataset(laborMarketDataset);
   const columns = [
-    { title: 'Título', data: 'label', render: upperCaseColumnRenderer },
+    { title: 'Nome da vaga', data: 'label', render: upperCaseColumnRenderer },
     { title: 'N.º de vagas', data: 'value', render: numberColumnRenderer },
   ];
   const columnDefs = [{ width: '50%', targets: 1 }];
@@ -99,7 +99,7 @@ function buildHighlightTitlesTechnician(laborMarketDataset) {
   
   const dataset = buildHighlightTitlesTechnicianDataset(laborMarketDataset);
   const columns = [
-    { title: 'Título', data: 'label', render: upperCaseColumnRenderer },
+    { title: 'Nome da vaga', data: 'label', render: upperCaseColumnRenderer },
     { title: 'N.º de vagas', data: 'value', render: numberColumnRenderer },
   ];
   const columnDefs = [{ width: '50%', targets: 1 }];
@@ -113,7 +113,7 @@ function buildHighlightTitlesOthers(laborMarketDataset) {
 
   const dataset = buildHighlightTitlesOthersDataset(laborMarketDataset);
   const columns = [
-    { title: 'Título', data: 'label', render: upperCaseColumnRenderer },
+    { title: 'Nome da vaga', data: 'label', render: upperCaseColumnRenderer },
     { title: 'N.º de vagas', data: 'value', render: numberColumnRenderer },
   ];
   const columnDefs = [{ width: '50%', targets: 1 }];
