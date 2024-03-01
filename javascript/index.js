@@ -28,24 +28,25 @@ function bootstrap() {
   $.getJSON(`dataset/${websiteValue}/dataset-${websiteValue}-${dateValue}.json`, function(laborMarketDataset) {
     buildGeographicDistribution(laborMarketDataset);
     buildHighlightEmployers(laborMarketDataset);
-    buildSalaryDistribution(laborMarketDataset);
+    buildHighlightStateVacancy(laborMarketDataset);
     buildVacancyProfile(laborMarketDataset);
     buildHighlightTitles(laborMarketDataset);
+    buildSalaryDistribution(laborMarketDataset);
 
     document.querySelector('div.loading').style.display = 'none';
   });
 }
 
 function buildGeographicDistribution(laborMarketDataset) {
-  const dataset = buildGeographicDistribuitionDataset(laborMarketDataset);
+  const dataset = buildGeographicDistributionDataset(laborMarketDataset);
   buildMapChart('chart-geographic-distribution', dataset);
 
   const columns = [
     { title: 'Estado', data: 'label', render: upperCaseColumnRenderer },
     { title: 'N.º de vagas', data: 'value', render: numberColumnRenderer },
-    { title: 'Vaga destacada', data: 'title', render: upperCaseColumnRenderer },
-    { title: 'N.º de postagens', data: 'posts', render: numberColumnRenderer },
     { title: 'N.º de contratantes', data: 'contractors', render: numberColumnRenderer },
+    { title: 'Média por contratante', data: 'average', render: numberColumnRenderer },
+    { title: 'Vagas confidenciais', data: 'percentage', render: percentageColumnRenderer },
   ];
   const columnDefs = [];
   const order = [[ 1, 'desc' ]];
@@ -57,9 +58,18 @@ function buildHighlightEmployers(laborMarketDataset) {
   buildBarChart('chart-highlight-employers', dataset);
 }
 
-function buildSalaryDistribution(laborMarketDataset) {
-  const dataset = buildSalaryDistributionDataset(laborMarketDataset);
-  buildColumnChart('chart-salary-distribution', dataset);
+function buildHighlightStateVacancy(laborMarketDataset) {
+  const dataset = buildHighlightStateVacancyDataset(laborMarketDataset);
+  const columns = [
+    { title: 'Estado', data: 'state', render: upperCaseColumnRenderer },
+    { title: 'Vaga destacada', data: 'vacancy', render: upperCaseColumnRenderer },
+    { title: 'N.º de postagens', data: 'posts', render: numberColumnRenderer },
+    { title: 'N.º de contratantes', data: 'contractors', render: numberColumnRenderer },
+    { title: 'Contratantes confidenciais', data: 'percentage', render: percentageColumnRenderer },
+  ];
+  const columnDefs = [];
+  const order = [[ 0, 'asc' ]];
+  buildDataTables('#datatable-highlight-state-vacancy', dataset, columns, columnDefs, order);
 }
 
 function buildVacancyProfile(laborMarketDataset) {
@@ -121,44 +131,35 @@ function buildHighlightTitlesOthers(laborMarketDataset) {
   buildDataTables('#datatable-highlight-titles-others', dataset, columns, columnDefs, order);
 }
 
-function buildGeographicDistribuitionDataset(laborMarketDataset) {
-  const highlight = (state) => {
-    const filtered = laborMarketDataset
-      .filter(item => item['LOCATION (STATE)'] === state)
-      .filter(item => typeof item['TITLE'] === 'string' && item['TITLE']?.trim())
-      .filter(item => typeof item['COMPANY'] === 'string' && item['COMPANY']?.trim());
+function buildSalaryDistribution(laborMarketDataset) {
+  const dataset = buildSalaryDistributionDataset(laborMarketDataset);
+  buildColumnChart('chart-salary-distribution', dataset);
+}
 
-    const titles = filtered.map(item => item['TITLE']?.toUpperCase()).sort();
-    const unique = [...new Set(titles)];
+function buildGeographicDistributionDataset(laborMarketDataset) {
+  const _buildStateInformation = (state) => {
+    const filtered = laborMarketDataset.filter(item => item['LOCATION (STATE)'] === state);
+    const value = filtered.length;
 
-    const counterFn = item => titles.filter(other => other === item).length;
-    const formatterFn = item => ({ label: item, value: counterFn(item) });
-    const descendingSorterFn = (item, other) => other?.value - item?.value;
-    const [highlighted] = unique.map(formatterFn).sort(descendingSorterFn);
+    const companyFilter = (item) => typeof item['COMPANY'] === 'string' && item['COMPANY']?.trim();
+    const companyMapper = (item) => item['COMPANY']?.toUpperCase();
+    const contractorList = filtered.filter(companyFilter).map(companyMapper).sort();
+    const contractors = [...new Set(contractorList)].length;
 
-    const contractors = title => {
-      const companies = filtered
-        .filter(item => item['TITLE']?.toUpperCase() === title?.toUpperCase())
-        .map(item => item['COMPANY']?.toUpperCase())
-        .sort();
-      return [...new Set(companies)].length;
-    };
+    const average = value && contractors ? value / contractors : 0;
 
-    return {
-      title: typeof highlighted?.label === 'string' ? highlighted?.label : '-',
-      posts: typeof highlighted?.value === 'number' ? highlighted?.value : 0,
-      contractors: contractors(highlighted?.label)
-    };
+    const confidentialFilter = (item) => item['COMPANY']?.toLowerCase() === 'confidencial';
+    const confidentials = filtered.filter(companyFilter).filter(confidentialFilter).length;
+    const percentage = confidentials && value ? confidentials / value : 0;
+
+    return { value, contractors, average, percentage };
   };
-  
-  const evaluatorFn = (item, other) => item.name === other['LOCATION (STATE)'];
-  const counterFn = item => laborMarketDataset.filter(other => evaluatorFn(item, other)).length;
+
   return brazilianGeographyDataset.map(item => {
     return {
       id: `BR-${item.abbreviation}`,
       label: item.name,
-      value: counterFn(item),
-      ...highlight(item.name)
+      ..._buildStateInformation(item.name)
     };
   });
 }
@@ -175,6 +176,55 @@ function buildHighlightEmployersDataset(laborMarketDataset) {
   const descendingSorterFn = (item, other) => other.value - item.value;
   const ascendingSorterFn = (item, other) => item.value - other.value;
   return unique.map(formatterFn).sort(descendingSorterFn).slice(0, 10).sort(ascendingSorterFn);
+}
+
+function buildHighlightStateVacancyDataset(laborMarketDataset) {
+  const _buildStateInformation = (state) => {
+    const filtered = laborMarketDataset.filter(item => item['LOCATION (STATE)'] === state);
+
+    const titleFilter = (item) => typeof item['TITLE'] === 'string' && item['TITLE']?.trim();
+    const titleMapper = (item) => item['TITLE']?.toUpperCase();
+    const titles = filtered.filter(titleFilter).map(titleMapper).sort();
+    const unique = [...new Set(titles)];
+
+    const counterFn = item => titles.filter(other => other === item).length;
+    const formatterFn = item => ({ label: item, value: counterFn(item) });
+    const descendingSorterFn = (item, other) => other?.value - item?.value;
+    const [ highlighted ] = unique.map(formatterFn).sort(descendingSorterFn);
+    const vacancy = typeof highlighted?.label === 'string' ? highlighted?.label : 'N/A';
+    const posts = typeof highlighted?.value === 'number' ? highlighted?.value : 0;
+
+    const highlightFilter = (item) => item['TITLE']?.toUpperCase() === vacancy?.toUpperCase();
+    const companyFilter = (item) => typeof item['COMPANY'] === 'string' && item['COMPANY']?.trim();
+    const companyMapper = (item) => item['COMPANY']?.toUpperCase();
+    const contractorList =  filtered
+      .filter(titleFilter)
+      .filter(highlightFilter)
+      .filter(companyFilter)
+      .map(companyMapper)
+      .sort();
+    const contractors = [...new Set(contractorList)].length;
+    
+    const confidentialFilter = (item) => item['COMPANY']?.toLowerCase() === 'confidencial';
+    const confidentials = filtered
+      .filter(titleFilter)
+      .filter(highlightFilter)
+      .filter(companyFilter)
+      .filter(confidentialFilter)
+      .length;
+
+    const percentage = confidentials && posts ? confidentials / posts : 0;
+
+    return { vacancy, posts, contractors, percentage };
+  };
+  
+  return brazilianGeographyDataset.map(item => {
+    return {
+      id: `BR-${item.abbreviation}`,
+      state: item.name,
+      ..._buildStateInformation(item.name)
+    };
+  });
 }
 
 function buildSalaryDistributionDataset(laborMarketDataset) {

@@ -61,9 +61,19 @@ function upperCaseColumnRenderer(data, type, row) {
   return configureColumnRenderer(data, type, row, renderer);
 }
 
+function percentageColumnRenderer(data, type, row) {
+  const renderer = (data, type, row) => {
+    const options = { style: 'percent', minimumFractionDigits: 2, maximumFractionDigits: 2 };
+    const formatter = new Intl.NumberFormat('pt-BR', options);
+    return typeof data === 'number' ? formatter.format(data) : 0;
+  };
+  return configureColumnRenderer(data, type, row, renderer);
+}
+
 function numberColumnRenderer(data, type, row) {
   const renderer = (data, type, row) => {
-    const formatter = new Intl.NumberFormat('pt-BR', { style: 'decimal' });
+    const options = { style: 'decimal', maximumFractionDigits: 2 };
+    const formatter = new Intl.NumberFormat('pt-BR', options);
     return typeof data === 'number' ? formatter.format(data) : 0;
   };
   return configureColumnRenderer(data, type, row, renderer);
@@ -71,7 +81,8 @@ function numberColumnRenderer(data, type, row) {
 
 function monetaryColumnRenderer(data, type, row) {
   const renderer = (data, type, row) => {
-    const formatter = new Intl.NumberFormat('pt-BR', { style: 'decimal' });
+    const options = { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 };
+    const formatter = new Intl.NumberFormat('pt-BR', options);
     return typeof data === 'number' ? `R$ ${formatter.format(data)}` : '-';
   };
   return configureColumnRenderer(data, type, row, renderer);
