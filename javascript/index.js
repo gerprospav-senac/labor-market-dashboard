@@ -231,12 +231,12 @@ function buildSalaryDistributionDataset(laborMarketDataset) {
   const filtered = laborMarketDataset
     .filter(item => item['SALARY (AVAILABLE)'] === true)
     .filter(item => typeof item['SALARY (MIN)'] === 'number')
-    .filter(item => item['SALARY (MIN)'] > 300 && item['SALARY (MIN)'] < 30000);
+    .filter(item => item['SALARY (MIN)'] > 100  && item['SALARY (MIN)'] < 100000);
   const salaries = filtered.map(item => item['SALARY (MIN)']);
 
   const counterFn = (min, max) => salaries.filter(item => item >= min && item <= max).length;
   return [
-    { label: 'Até R$ 1.000', value: counterFn(0, 1000) },
+    { label: 'Até R$ 1.000', value: counterFn(100, 1000) },
     { label: 'R$ 1.001 a R$ 1.500', value: counterFn(1001, 1500) },
     { label: 'R$ 1.501 a R$ 2.000', value: counterFn(1501, 2000) },
     { label: 'R$ 2.001 a R$ 3.000', value: counterFn(2001, 3000) },
@@ -244,7 +244,7 @@ function buildSalaryDistributionDataset(laborMarketDataset) {
     { label: 'R$ 4.001 a R$ 5.000', value: counterFn(4001, 5000) },
     { label: 'R$ 5.001 a R$ 7.000', value: counterFn(5001, 7000) },
     { label: 'R$ 7.001 a R$ 10.000', value: counterFn(7001, 10000) },
-    { label: 'Acima de R$ 10.001', value: counterFn(10001, 30000) }
+    { label: 'Acima de R$ 10.001', value: counterFn(10001, 100000) }
   ];
 }
 
