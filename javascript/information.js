@@ -48,16 +48,30 @@ function buildVacancyBoxes(laborMarketDataset) {
 }
 
 function buildVacancyList(laborMarketDataset) {
-  const dataset = Array.isArray(laborMarketDataset) ? laborMarketDataset : [];
+  let dataset = Array.isArray(laborMarketDataset) ? laborMarketDataset : [];
+  dataset = dataset.map(item => {
+    const relationships = [];
+    const validate = (item, field) => item[field] === true || item[field] === 'true';
+    if (validate(item, 'relationship_permanent')) relationships.push('Efetivo');
+    if (validate(item, 'relationship_independent')) relationships.push('Autônomo');
+    if (validate(item, 'relationship_temporary')) relationships.push('Temporário');
+    if (validate(item, 'relationship_internship')) relationships.push('Estágio');
+    if (validate(item, 'relationship_apprenticeship')) relationships.push('Jovem Aprendiz');
+    if (validate(item, 'relationship_other')) relationships.push('Outros');
+    if (validate(item, 'relationship_uninformed')) relationships.push('Não Informado');
+    item.relationship = relationships.join(', ');
+    return item;
+  });
+
   const columns = [
-    { title: 'Nome da vaga', data: 'TITLE', render: upperCaseColumnRenderer },
-    { title: 'Empresa', data: 'COMPANY', render: upperCaseColumnRenderer },
-    { title: 'Salário', data: 'SALARY (MIN)', render: monetaryColumnRenderer },
-    { title: 'Vínculo', data: 'RELATIONSHIP', render: upperCaseColumnRenderer },
-    { title: 'Modalidade', data: 'MODALITY (NORMALIZED)', render: upperCaseColumnRenderer },
-    { title: 'Estado', data: 'LOCATION (STATE)', render: upperCaseColumnRenderer },
-    { title: 'PCD', data: 'PWD', render: booleanColumnRenderer },
-    { title: 'Publicação', data: 'PUBLICATION DATE (NORMALIZED)', render: dateColumnRenderer },
+    { title: 'Nome da vaga', data: 'title', render: upperCaseColumnRenderer },
+    { title: 'Empresa', data: 'company', render: upperCaseColumnRenderer },
+    { title: 'Salário', data: 'salary_min', render: monetaryColumnRenderer },
+    { title: 'Vínculo', data: 'relationship', render: upperCaseColumnRenderer },
+    { title: 'Modalidade', data: 'modality_normalized', render: upperCaseColumnRenderer },
+    { title: 'Estado', data: 'location_state', render: upperCaseColumnRenderer },
+    { title: 'PCD', data: 'pwd', render: booleanColumnRenderer },
+    { title: 'Publicação', data: 'publication_date_normalized', render: dateColumnRenderer },
   ];
   buildDataTables('#datatable-vacancy-list', dataset, columns);
 }

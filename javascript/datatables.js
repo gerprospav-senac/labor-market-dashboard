@@ -65,7 +65,7 @@ function percentageColumnRenderer(data, type, row) {
   const renderer = (data, type, row) => {
     const options = { style: 'percent', minimumFractionDigits: 2, maximumFractionDigits: 2 };
     const formatter = new Intl.NumberFormat('pt-BR', options);
-    return typeof data === 'number' ? formatter.format(data) : 0;
+    return data ? formatter.format(data) : 0;
   };
   return configureColumnRenderer(data, type, row, renderer);
 }
@@ -74,7 +74,7 @@ function numberColumnRenderer(data, type, row) {
   const renderer = (data, type, row) => {
     const options = { style: 'decimal', maximumFractionDigits: 2 };
     const formatter = new Intl.NumberFormat('pt-BR', options);
-    return typeof data === 'number' ? formatter.format(data) : 0;
+    return data ? formatter.format(data) : 0;
   };
   return configureColumnRenderer(data, type, row, renderer);
 }
@@ -83,20 +83,24 @@ function monetaryColumnRenderer(data, type, row) {
   const renderer = (data, type, row) => {
     const options = { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 };
     const formatter = new Intl.NumberFormat('pt-BR', options);
-    return typeof data === 'number' ? `R$ ${formatter.format(data)}` : '-';
+    return data ? `R$ ${formatter.format(data)}` : '-';
   };
   return configureColumnRenderer(data, type, row, renderer);
 }
 
 function booleanColumnRenderer(data, type, row) {
-  const renderer = (data, type, row) => data ? 'SIM' : 'NÃO';
+  const renderer = (data, type, row) => data === true || data === 'true' ? 'SIM' : 'NÃO';
   return configureColumnRenderer(data, type, row, renderer);
 }
 
 function dateColumnRenderer(data, type, row) {
   const renderer = (data, type, row) => {
-    const DateTime = luxon.DateTime;
-    return DateTime.fromISO(data).toLocaleString(DateTime.DATE_SHORT);
+    if (data) {
+      const DateTime = luxon.DateTime;
+      return DateTime.fromISO(data).toLocaleString(DateTime.DATE_SHORT);
+    } else {
+      return '-';
+    }
   };
   return configureColumnRenderer(data, type, row, renderer);
 }

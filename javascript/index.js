@@ -138,37 +138,45 @@ function buildSalaryDistribution(laborMarketDataset) {
 
 function buildGeographicDistributionDataset(laborMarketDataset) {
   const _buildStateInformation = (state) => {
-    const filtered = laborMarketDataset.filter(item => item['LOCATION (STATE)'] === state);
+    const filtered = laborMarketDataset.filter(item => item['location_state'] === state);
     const value = filtered.length;
 
-    const companyFilter = (item) => typeof item['COMPANY'] === 'string' && item['COMPANY']?.trim();
-    const companyMapper = (item) => item['COMPANY']?.toUpperCase();
+    const companyFilter = (item) => typeof item['company'] === 'string' && item['company']?.trim();
+    const companyMapper = (item) => item['company']?.toUpperCase();
     const contractorList = filtered.filter(companyFilter).map(companyMapper).sort();
     const contractors = [...new Set(contractorList)].length;
 
     const average = value && contractors ? value / contractors : 0;
 
-    const confidentialFilter = (item) => item['COMPANY']?.toLowerCase() === 'confidencial';
+    const confidentialFilter = (item) => item['company']?.toLowerCase() === 'confidencial';
     const confidentials = filtered.filter(companyFilter).filter(confidentialFilter).length;
     const percentage = confidentials && value ? confidentials / value : 0;
 
     return { value, contractors, average, percentage };
   };
 
-  return brazilianGeographyDataset.map(item => {
+  const dataset = brazilianGeographyDataset.map(item => {
     return {
       id: `BR-${item.abbreviation}`,
       label: item.name,
       ..._buildStateInformation(item.name)
     };
   });
+
+  dataset.push({
+    id: undefined,
+    label: 'Remoto',
+    ..._buildStateInformation('Remoto')
+  });
+
+  return dataset;
 }
 
 function buildHighlightEmployersDataset(laborMarketDataset) {
   const filtered = laborMarketDataset
-    .filter(item => typeof item['COMPANY'] === 'string' && item['COMPANY']?.trim())
-    .filter(item => item['COMPANY']?.toLowerCase() !== 'confidencial');
-  const companies = filtered.map(item => item['COMPANY']?.toUpperCase()).sort();
+    .filter(item => typeof item['company'] === 'string' && item['company']?.trim())
+    .filter(item => item['company']?.toLowerCase() !== 'confidencial');
+  const companies = filtered.map(item => item['company']?.toUpperCase()).sort();
   const unique = [...new Set(companies)];
 
   const counterFn = item => companies.filter(other => other === item).length;
@@ -180,10 +188,10 @@ function buildHighlightEmployersDataset(laborMarketDataset) {
 
 function buildHighlightStateVacancyDataset(laborMarketDataset) {
   const _buildStateInformation = (state) => {
-    const filtered = laborMarketDataset.filter(item => item['LOCATION (STATE)'] === state);
+    const filtered = laborMarketDataset.filter(item => item['location_state'] === state);
 
-    const titleFilter = (item) => typeof item['TITLE'] === 'string' && item['TITLE']?.trim();
-    const titleMapper = (item) => item['TITLE']?.toUpperCase();
+    const titleFilter = (item) => typeof item['title'] === 'string' && item['title']?.trim();
+    const titleMapper = (item) => item['title']?.toUpperCase();
     const titles = filtered.filter(titleFilter).map(titleMapper).sort();
     const unique = [...new Set(titles)];
 
@@ -194,9 +202,9 @@ function buildHighlightStateVacancyDataset(laborMarketDataset) {
     const vacancy = typeof highlighted?.label === 'string' ? highlighted?.label : 'N/A';
     const posts = typeof highlighted?.value === 'number' ? highlighted?.value : 0;
 
-    const highlightFilter = (item) => item['TITLE']?.toUpperCase() === vacancy?.toUpperCase();
-    const companyFilter = (item) => typeof item['COMPANY'] === 'string' && item['COMPANY']?.trim();
-    const companyMapper = (item) => item['COMPANY']?.toUpperCase();
+    const highlightFilter = (item) => item['title']?.toUpperCase() === vacancy?.toUpperCase();
+    const companyFilter = (item) => typeof item['company'] === 'string' && item['company']?.trim();
+    const companyMapper = (item) => item['company']?.toUpperCase();
     const contractorList =  filtered
       .filter(titleFilter)
       .filter(highlightFilter)
@@ -205,7 +213,7 @@ function buildHighlightStateVacancyDataset(laborMarketDataset) {
       .sort();
     const contractors = [...new Set(contractorList)].length;
     
-    const confidentialFilter = (item) => item['COMPANY']?.toLowerCase() === 'confidencial';
+    const confidentialFilter = (item) => item['company']?.toLowerCase() === 'confidencial';
     const confidentials = filtered
       .filter(titleFilter)
       .filter(highlightFilter)
@@ -217,22 +225,32 @@ function buildHighlightStateVacancyDataset(laborMarketDataset) {
 
     return { vacancy, posts, contractors, percentage };
   };
-  
-  return brazilianGeographyDataset.map(item => {
+
+  const dataset = brazilianGeographyDataset.map(item => {
     return {
       id: `BR-${item.abbreviation}`,
       state: item.name,
       ..._buildStateInformation(item.name)
     };
   });
+
+  dataset.push({
+    id: undefined,
+    state: 'Remoto',
+    ..._buildStateInformation('Remoto')
+  })
+  
+  return dataset;
 }
 
 function buildSalaryDistributionDataset(laborMarketDataset) {
   const filtered = laborMarketDataset
-    .filter(item => item['SALARY (AVAILABLE)'] === true)
-    .filter(item => typeof item['SALARY (MIN)'] === 'number')
-    .filter(item => item['SALARY (MIN)'] > 100  && item['SALARY (MIN)'] < 100000);
-  const salaries = filtered.map(item => item['SALARY (MIN)']);
+    .filter(item => item['salary_available'] === true || item['salary_available'] === "true")
+    .filter(item => item['salary_min']);
+
+  const salaries = filtered
+    .map(item => parseFloat(item['salary_min']))
+    .filter(item => item > 100  && item < 100000);
 
   const counterFn = (min, max) => salaries.filter(item => item >= min && item <= max).length;
   return [
@@ -249,17 +267,20 @@ function buildSalaryDistributionDataset(laborMarketDataset) {
 }
 
 function buildVacancyProfileRelationshipDataset(laborMarketDataset) {
-  const filtered = laborMarketDataset.filter(item => typeof item['RELATIONSHIP'] === 'string' && item['RELATIONSHIP']?.trim());
-  const relationships = filtered.map(item => item['RELATIONSHIP']).sort();
-  const unique = [...new Set(relationships)];
-
-  const counterFn = item => relationships.filter(other => other === item).length;
-  const formatterFn = item => ({ label: item, value: counterFn(item) });
-  return unique.map(formatterFn);
+  const counterFn = (field) => laborMarketDataset.filter(item => item[field] === true || item[field] === 'true').length;
+  return [
+    { label: 'Efetivo', value: counterFn('relationship_permanent') },
+    { label: 'Autônomo', value: counterFn('relationship_independent') },
+    { label: 'Temporário', value: counterFn('relationship_temporary') },
+    { label: 'Estágio', value: counterFn('relationship_internship') },
+    { label: 'Jovem Aprendiz', value: counterFn('relationship_apprenticeship') },
+    { label: 'Outros', value: counterFn('relationship_other') },
+    { label: 'Não Informado', value: counterFn('relationship_uninformed') },
+  ];
 }
 
 function buildVacancyProfileModalityDataset(laborMarketDataset) {
-  const homeOffice = laborMarketDataset.filter(item => item['MODALITY (NORMALIZED)'] === 'home office');
+  const homeOffice = laborMarketDataset.filter(item => item['modality_normalized'] === 'home office');
   return [
     { label: 'Presencial', value: laborMarketDataset.length - homeOffice.length },
     { label: 'Home Office', value: homeOffice.length },
@@ -267,7 +288,7 @@ function buildVacancyProfileModalityDataset(laborMarketDataset) {
 }
 
 function buildVacancyProfilePWDDataset(laborMarketDataset) {
-  const pwd = laborMarketDataset.filter(item => item['PWD'] === true);
+  const pwd = laborMarketDataset.filter(item => item['pwd'] === true || item['pwd'] === "true");
   return [
     { label: 'Padrão', value: laborMarketDataset.length - pwd.length },
     { label: 'PCD', value: pwd.length },
@@ -276,10 +297,10 @@ function buildVacancyProfilePWDDataset(laborMarketDataset) {
 
 function buildHighlightTitlesApprenticeStateDataset(laborMarketDataset) {
   const filtered = laborMarketDataset
-    .filter(item => typeof item['TITLE'] === 'string' && item['TITLE']?.trim())
-    .filter(item => item['TITLE']?.toLowerCase()?.includes('aprendiz'));
+    .filter(item => typeof item['title'] === 'string' && item['title']?.trim())
+    .filter(item => item['title']?.toLowerCase()?.includes('aprendiz'));
 
-  const evaluatorFn = (item, other) => item?.name === other['LOCATION (STATE)'];
+  const evaluatorFn = (item, other) => item?.name === other['location_state'];
   const counterFn = item => filtered.filter(other => evaluatorFn(item, other)).length;
   const formatterFn = item => ({ id: `BR-${item.abbreviation}`, label: item.name, value: counterFn(item) });
   return brazilianGeographyDataset.map(formatterFn).sort((item, other) => other.value - item.value).slice(0, 3);
@@ -287,10 +308,10 @@ function buildHighlightTitlesApprenticeStateDataset(laborMarketDataset) {
 
 function buildHighlightTitlesApprenticeDataset(laborMarketDataset) {
   const filtered = laborMarketDataset
-    .filter(item => typeof item['TITLE'] === 'string' && item['TITLE']?.trim())
-    .filter(item => item['TITLE']?.toLowerCase()?.includes('aprendiz'));
+    .filter(item => typeof item['title'] === 'string' && item['title']?.trim())
+    .filter(item => item['title']?.toLowerCase()?.includes('aprendiz'));
   
-  const titles = filtered.map(item => item['TITLE']?.toLowerCase()).sort();
+  const titles = filtered.map(item => item['title']?.toLowerCase()).sort();
   const unique = [...new Set(titles)];
 
   const counterFn = item => titles.filter(other => other === item).length;
@@ -299,10 +320,10 @@ function buildHighlightTitlesApprenticeDataset(laborMarketDataset) {
 
 function buildHighlightTitlesTechnicianStateDataset(laborMarketDataset) {
   const filtered = laborMarketDataset
-    .filter(item => typeof item['TITLE'] === 'string' && item['TITLE']?.trim())
-    .filter(item => item['TITLE']?.toLowerCase()?.startsWith('técnico'));
+    .filter(item => typeof item['title'] === 'string' && item['title']?.trim())
+    .filter(item => item['title']?.toLowerCase()?.startsWith('técnico'));
 
-  const evaluatorFn = (item, other) => item.name === other['LOCATION (STATE)'];
+  const evaluatorFn = (item, other) => item.name === other['location_state'];
   const counterFn = item => filtered.filter(other => evaluatorFn(item, other)).length;
   const formatterFn = item => ({ id: `BR-${item.abbreviation}`, label: item.name, value: counterFn(item) });
   return brazilianGeographyDataset.map(formatterFn).sort((item, other) => other.value - item.value).slice(0, 3);
@@ -310,10 +331,10 @@ function buildHighlightTitlesTechnicianStateDataset(laborMarketDataset) {
 
 function buildHighlightTitlesTechnicianDataset(laborMarketDataset) {
   const filtered = laborMarketDataset
-    .filter(item => typeof item['TITLE'] === 'string' && item['TITLE']?.trim())
-    .filter(item => item['TITLE']?.toLowerCase()?.startsWith('técnico'));
+    .filter(item => typeof item['title'] === 'string' && item['title']?.trim())
+    .filter(item => item['title']?.toLowerCase()?.startsWith('técnico'));
   
-  const titles = filtered.map(item => item['TITLE']?.toLowerCase()).sort();
+  const titles = filtered.map(item => item['title']?.toLowerCase()).sort();
   const unique = [...new Set(titles)];
 
   const counterFn = item => titles.filter(other => other === item).length;
@@ -322,10 +343,10 @@ function buildHighlightTitlesTechnicianDataset(laborMarketDataset) {
 
 function buildHighlightTitlesOthersStateDataset(laborMarketDataset) {
   const filtered = laborMarketDataset
-    .filter(item => typeof item['TITLE'] === 'string' && item['TITLE']?.trim())
-    .filter(item => !item['TITLE']?.toLowerCase()?.includes('aprendiz') && !item['TITLE']?.toLowerCase()?.startsWith('técnico'));
+    .filter(item => typeof item['title'] === 'string' && item['title']?.trim())
+    .filter(item => !item['title']?.toLowerCase()?.includes('aprendiz') && !item['title']?.toLowerCase()?.startsWith('técnico'));
 
-  const evaluatorFn = (item, other) => item.name === other['LOCATION (STATE)'];
+  const evaluatorFn = (item, other) => item.name === other['location_state'];
   const counterFn = item => filtered.filter(other => evaluatorFn(item, other)).length;
   const formatterFn = item => ({ id: `BR-${item.abbreviation}`, label: item.name, value: counterFn(item) });
   return brazilianGeographyDataset.map(formatterFn).sort((item, other) => other.value - item.value).slice(0, 3);
@@ -333,10 +354,10 @@ function buildHighlightTitlesOthersStateDataset(laborMarketDataset) {
 
 function buildHighlightTitlesOthersDataset(laborMarketDataset) {
   const filtered = laborMarketDataset
-    .filter(item => typeof item['TITLE'] === 'string' && item['TITLE']?.trim())
-    .filter(item => !item['TITLE']?.toLowerCase()?.includes('aprendiz') && !item['TITLE']?.toLowerCase()?.startsWith('técnico'));
+    .filter(item => typeof item['title'] === 'string' && item['title']?.trim())
+    .filter(item => !item['title']?.toLowerCase()?.includes('aprendiz') && !item['title']?.toLowerCase()?.startsWith('técnico'));
   
-  const titles = filtered.map(item => item['TITLE']?.toLowerCase()).sort();
+  const titles = filtered.map(item => item['title']?.toLowerCase()).sort();
   const unique = [...new Set(titles)];
 
   const counterFn = item => titles.filter(other => other === item).length;
